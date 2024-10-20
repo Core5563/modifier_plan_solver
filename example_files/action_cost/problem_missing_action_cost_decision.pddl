@@ -1,0 +1,7 @@
+(define (problem action_cost_problem_SolvableA)
+    (:domain missing_action_cost_domain)
+    (:objects state)
+    (:init (TRUEX state) (= (total-cost) 0))
+    (:goal (and (TRUEP state) (TRUEQ state)))
+    (:metric minimize (total-cost))
+)

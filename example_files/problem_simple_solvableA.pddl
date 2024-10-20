@@ -1,0 +1,6 @@
+(define (problem simple_problem_SolvableA)
+    (:domain simple_solvableA)
+    (:objects state)
+    (:init (and (TRUEX state)))
+    (:goal (and (TRUEP state) (TRUEQ state)))
+)

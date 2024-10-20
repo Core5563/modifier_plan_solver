@@ -1,0 +1,18 @@
+(define (domain missing_action_cost_domain)
+    (:requirements :strips :action-costs)
+    (:predicates (TRUEX ?x) (TRUEZ ?x) (TRUEP ?x) (TRUEQ ?x))
+    (:functions (total-cost) - number)
+    (:action a1
+        :parameters (?x)
+        :precondition (and (TRUEX ?x)) 
+        :effect (and (TRUEP ?x) (TRUEQ ?x)
+                )
+    )
+    (:action a2
+        :parameters (?x)
+        :precondition (TRUEX ?x)
+        :effect (and (TRUEP ?x) (TRUEQ ?x)
+                     (increase (total-cost) 2)
+                )
+    )
+)
