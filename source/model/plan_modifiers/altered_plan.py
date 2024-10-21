@@ -8,14 +8,15 @@ import unified_planning
 
 class AlteredPlanInfo:
     """class to hold all info regarding the transformed problem"""
-    def __init__(self, grounded_altered_actions_mapping: dict,
-        altered_grounded_actions_mapping: dict,
-        altered_problem: Problem):
-        self.grounded_altered_actions_mapping: dict = grounded_altered_actions_mapping
-        self.altered_grounded_actions_mapping: dict = altered_grounded_actions_mapping
+    def __init__(self, grounded_altered_actions_mapping: dict[str, str],
+            altered_grounded_actions_mapping: dict[str, str],
+            altered_problem: Problem):
+        self.grounded_altered_actions_mapping: dict[str, str] = grounded_altered_actions_mapping
+        self.altered_grounded_actions_mapping: dict[str, str] = altered_grounded_actions_mapping
         self.altered_plan: Problem = altered_problem
 
 class AlteredAction(InstantaneousAction):
+    """give additional information""" 
     def __init__(self,
         _name: str,
         _parameters:Optional[OrderedDict[str, unified_planning.model.types.Type]] = None,

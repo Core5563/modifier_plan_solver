@@ -55,3 +55,4 @@ def calculate_total_action_cost_metric(problem: Problem) -> Tuple[int, dict[str,
             action_cost_mapping[action.name] = 1
             total_cost += 1
     return (total_cost, action_cost_mapping)
+
