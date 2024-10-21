@@ -2,7 +2,7 @@ from source.model.plan_modifiers.modifier_util import read_problem_from_file, gr
 from unified_planning.shortcuts import *
 #import unified_planning.shortcuts as us
 from unified_planning.engines.results import CompilerResult
-from source.model.plan_modifiers.exp_modifier import ExpModifier
+from source.model.plan_modifiers.exp_modifier import ExpModifier, cost_multiplier
 
 
 def testReadInFromFile():
@@ -29,12 +29,22 @@ def readInWithActionCost():
     planner = OneshotPlanner(problem_kind=grounded_problem.problem.kind, optimality_guarantee=OptimalityGuarantee.SOLVED_OPTIMALLY)
     print(planner.solve(grounded_problem.problem))
 
-def instanciatePlanModifier():
+
+
+def instantiatePlanModifier():
     problem = read_problem_from_file('example_files/action_cost/domain_action_cost_exampleA.pddl', 'example_files/action_cost/problem_action_cost_exampleA.pddl')
     pm = ExpModifier(problem)
 
+
+
+def permutationTest():
+    print(cost_multiplier([False, False, False, True]))
+
+
+
 if __name__ == '__main__':
     #testReadInFromFile()
-    testCompiler2()
+    #testCompiler2()
     #readInWithActionCost()
-    #instanciatePlanModifier()
+    #instantiatePlanModifier()
+    permutationTest()
