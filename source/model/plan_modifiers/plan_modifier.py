@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from unified_planning.model import Problem
 from unified_planning.engines.results import CompilerResult
 from .modifier_util import read_problem_from_file, ground_problem, calculate_total_action_cost_metric
-from .altered_plan import AlteredPlanInfo
+from .modified_plan import ModifiedProblemInfo
 
 
 class PlanModifier(ABC):
@@ -19,7 +19,7 @@ class PlanModifier(ABC):
         self.total_action_cost: int = total_cost
         self.cost_mapping: dict[str, int] = mapping
         #create altered plan
-        self.altered_plan = self._transform_grounded_plan()
+        self.modified_problem_info = self._transform_grounded_plan()
 
     @classmethod
     def from_file(cls, domain_filepath: str, problem_filepath: str):
@@ -28,5 +28,10 @@ class PlanModifier(ABC):
         return cls(problem)
 
     @abstractmethod
-    def _transform_grounded_plan(self) -> AlteredPlanInfo:
+    def _transform_grounded_plan(self) -> ModifiedProblemInfo:
         """create substitute plan from original plan """
+        raise NotImplementedError
+
+    def try_solving_plan(self):
+        """use a planner to solve and backtrack on the modified problem """
+        pass

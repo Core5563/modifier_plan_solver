@@ -2,7 +2,7 @@ from source.model.plan_modifiers.modifier_util import read_problem_from_file, gr
 from unified_planning.shortcuts import *
 #import unified_planning.shortcuts as us
 from unified_planning.engines.results import CompilerResult
-from source.model.plan_modifiers.exp_modifier import ExpModifier, cost_multiplier
+from source.model.plan_modifiers.exp_modifier import ExpModifier, permutation_info
 
 
 def testReadInFromFile():
@@ -34,11 +34,14 @@ def readInWithActionCost():
 def instantiatePlanModifier():
     problem = read_problem_from_file('example_files/action_cost/domain_action_cost_exampleA.pddl', 'example_files/action_cost/problem_action_cost_exampleA.pddl')
     pm = ExpModifier(problem)
+    print(pm.original_problem)
+    print(pm.grounded_information.problem)
+    print(pm.modified_problem_info.modified_problem)
 
 
 
 def permutationTest():
-    print(cost_multiplier([False, False, False, True]))
+    print(permutation_info([True, True, True ,True]))
 
 
 
@@ -46,5 +49,5 @@ if __name__ == '__main__':
     #testReadInFromFile()
     #testCompiler2()
     #readInWithActionCost()
-    #instantiatePlanModifier()
-    permutationTest()
+    instantiatePlanModifier()
+    #permutationTest()
