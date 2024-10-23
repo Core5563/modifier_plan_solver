@@ -1,6 +1,6 @@
 """ Imports"""
 from uuid import uuid4
-from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action,Expression, Fluent, BoolType
+from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Expression, Fluent, BoolType
 from .plan_modifier import PlanModifier
 from .modified_plan import ModifiedProblemInfo
 
@@ -107,12 +107,14 @@ def create_action_according_to_permutation(
     while setting the appropriate actions
     returns (entry action, exit action)
     """
+    uuid_action_combination:str = str(uuid4())
+
     #create entry to exit fluent
-    entry_exit_fluent_name = "precon_entry_exit_" + original_action.name + "_" + str(uuid4())
+    entry_exit_fluent_name = "precon_entry_exit_" + original_action.name + "_" + uuid_action_combination
     entry_exit_fluent = Fluent(entry_exit_fluent_name, BoolType())
 
     #create entry action
-    entry_action_name ="entry_action_" + original_action.name + "_" + str(uuid4())
+    entry_action_name ="entry_action_" + original_action.name + "_" + uuid_action_combination
     entry_action = InstantaneousAction(entry_action_name)
 
     #add effect
@@ -121,8 +123,8 @@ def create_action_according_to_permutation(
     #create entry to map left precondition if choosing this entry
     action_to_left_precondition_mapping[entry_action_name] = []
 
-    #set cost for entryappropriately
-    amount_used_precon, left_out_precon = permutation_info(permutation)
+    #set cost for entry appropriately
+    _ , left_out_precon = permutation_info(permutation)
     total_amount_of_actions_grounded_problem = len(cost_mapping_grounded)
     cost_of_entry_action = (left_out_precon
         * total_amount_of_actions_grounded_problem
@@ -131,7 +133,7 @@ def create_action_according_to_permutation(
 
     #create exit condition
     exit_action = original_action.clone()
-    exit_action_name ="exit_action_" + original_action.name + "_" + str(uuid4())
+    exit_action_name ="exit_action_" + original_action.name + "_" + uuid_action_combination
     exit_action._name = exit_action_name
     exit_action.clear_preconditions()
 

@@ -15,7 +15,7 @@ class ModifiedProblemInfo:
             ):
         self.grounded_modified_actions_mapping: dict[str, str] = grounded_modified_actions_mapping
         self.modified_grounded_actions_mapping: dict[str, str] = modified_grounded_actions_mapping
-        self.modified_problem: Problem = modified_problem
+        self.problem: Problem = modified_problem
         self.action_to_left_precondition_mapping: dict[str, list[Fluent]] = action_to_left_precondition_mapping
 
 class ModifiedAction(InstantaneousAction):
@@ -32,5 +32,6 @@ class ModifiedAction(InstantaneousAction):
         self.action_reference: Action | None = _action_reference
 
 class ModifiedPlanInformation():
+    """info regarding the found plan"""
     def __init__(self, plan_found: bool):
         self.plan_found = plan_found

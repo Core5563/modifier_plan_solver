@@ -36,12 +36,48 @@ def instantiatePlanModifier():
     pm = ExpModifier(problem)
     print(pm.original_problem)
     print(pm.grounded_information.problem)
-    print(pm.modified_problem_info.modified_problem)
+    print(pm.modified_problem_info.problem)
 
 
 
 def permutationTest():
     print(permutation_info([True, True, True ,True]))
+
+def basic_example():
+    problem = Problem()
+    #atoms
+    x = Fluent("x", BoolType())
+    y = Fluent("y", BoolType())
+    z = Fluent("z", BoolType())
+    p = Fluent("p", BoolType())
+    q = Fluent("q", BoolType())
+    #define actions
+    action1 = InstantaneousAction("action1")
+    action1.add_precondition(x)
+    action1.add_precondition(y)
+    action1.add_effect(x, False)
+    action1.add_effect(y, False)
+    action1.add_effect(z, True)
+    action2 = InstantaneousAction("action2")
+    action2.add_precondition(z)
+    action2.add_effect(z, False)
+    action2.add_effect(p, True)
+    action2.add_effect(q, True)
+    #add actions
+    problem.add_action(action1)
+    problem.add_action(action2)
+    #initial values
+    problem.add_fluent(x, default_initial_value = True)
+    problem.add_fluent(y, default_initial_value = True)
+    problem.add_fluent(z, default_initial_value = False)
+    problem.add_fluent(p, default_initial_value = False)
+    problem.add_fluent(q, default_initial_value = False)
+    #goal
+    problem.add_goal(p)
+    problem.add_goal(q)
+    
+    pm = ExpModifier(problem)
+    print(pm.modified_problem_info.problem)
 
 
 
@@ -49,5 +85,6 @@ if __name__ == '__main__':
     #testReadInFromFile()
     #testCompiler2()
     #readInWithActionCost()
-    instantiatePlanModifier()
+    #instantiatePlanModifier()
     #permutationTest()
+    basic_example()

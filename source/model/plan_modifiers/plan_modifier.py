@@ -34,4 +34,3 @@ class PlanModifier(ABC):
 
     def try_solving_plan(self):
         """use a planner to solve and backtrack on the modified problem """
-        pass
