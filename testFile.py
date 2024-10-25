@@ -77,7 +77,24 @@ def basic_example():
     problem.add_goal(q)
     
     pm = ExpModifier(problem)
-    print(pm.modified_problem_info.problem)
+    #print(pm.modified_problem_info.action_to_left_precondition_mapping)
+    #print(pm.modified_problem_info.modified_grounded_actions_mapping)
+    #print(pm.modified_problem_info.grounded_modified_actions_mapping)
+    #print(pm.modified_problem_info.problem)
+    pm.try_solving_plan()
+    print(pm.plan_info.plan_results.plan.kind)
+    print(pm.plan_info.plan_results.plan.actions)
+    print(pm.plan_info.backtracked_grounded_plan_result)
+    print(pm.plan_info.left_preconditions)
+    
+    
+    #planer = OneshotPlanner(problem_kind=problem.kind, optimality_guarantee=OptimalityGuarantee.SATISFYING)
+    #plan_result = planer.solve(problem)
+    
+    #planer = OneshotPlanner(problem_kind=pm.modified_problem_info.problem.kind, optimality_guarantee=OptimalityGuarantee.SOLVED_OPTIMALLY)
+    #plan_result = planer.solve(pm.modified_problem_info.problem)
+    #print(plan_result)
+    pass
 
 
 

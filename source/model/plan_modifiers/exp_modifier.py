@@ -1,6 +1,6 @@
 """ Imports"""
 from uuid import uuid4
-from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Expression, Fluent, BoolType
+from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Fluent, BoolType
 from .plan_modifier import PlanModifier
 from .modified_plan import ModifiedProblemInfo
 
@@ -23,7 +23,9 @@ class ExpModifier(PlanModifier):
         #create mappings for backtracking later
         modified_grounded_actions_mapping = dict[str, str]()
         grounded_modified_actions_mapping = dict[str, str]()
-        action_to_left_precondition_mapping = dict[str, list[Fluent]]()
+        action_to_left_precondition_mapping = dict[str, tuple[InstantaneousAction, list[Fluent]]]()
+        name_to_action = dict[str, InstantaneousAction]()
+        
 
         for action in problem.actions:
             if not isinstance(action, InstantaneousAction):
@@ -35,16 +37,19 @@ class ExpModifier(PlanModifier):
                 #create new action name
                 new_action_name:str = (inst_action.name) + str(uuid4())
 
-                #remember mapping via names
-                modified_grounded_actions_mapping[new_action_name] = inst_action.name
-                grounded_modified_actions_mapping[inst_action.name] = new_action_name
-
                 #create the new action
                 new_action = inst_action.clone()
                 new_action._name = new_action_name
 
+                #remember mapping via names
+                modified_grounded_actions_mapping[new_action_name] = inst_action.name
+                grounded_modified_actions_mapping[inst_action.name] = new_action_name
+
                 #add action to new problem
                 modified_problem.add_action(new_action)
+
+                #remember mapping
+                name_to_action[new_action_name] = new_action
 
                 #set cost mapping for minimizing metric later
                 modified_problem_cost_mapping[new_action] = (self.cost_mapping[inst_action.name]
@@ -56,18 +61,18 @@ class ExpModifier(PlanModifier):
                 inst_action,
                 modified_problem,
                 modified_grounded_actions_mapping,
-                grounded_modified_actions_mapping,
+                name_to_action,
                 action_to_left_precondition_mapping,
                 self.cost_mapping,
                 modified_problem_cost_mapping,
                 self.total_action_cost
             )
-        modified_problem.add_quality_metric(MinimizeActionCosts(modified_problem_cost_mapping))
+        modified_problem.add_quality_metric(MinimizeActionCosts(modified_problem_cost_mapping, default = 1))
         return ModifiedProblemInfo(
             modified_problem,
-            grounded_modified_actions_mapping,
             modified_grounded_actions_mapping,
-            action_to_left_precondition_mapping
+            action_to_left_precondition_mapping,
+            name_to_action
         )
 
 
@@ -92,19 +97,20 @@ def increase_permutation(permutation: list[bool]) -> None:
             permutation[index] = True
             break
 
-def create_action_according_to_permutation(
-        permutation: list[bool], 
+def create_actions_according_to_permutation(
+        permutation: list[bool],
+        modified_problem: Problem,
         original_action: InstantaneousAction,
         modified_grounded_actions_mapping: dict[str, str],
-        grounded_modified_actions_mapping: dict[str, str],
-        action_to_left_precondition_mapping: dict[str, list[Fluent]],
+        name_to_action: dict[str, InstantaneousAction],
+        action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[Fluent]]],
         cost_mapping_grounded: dict[str, int],
         modified_problem_cost_mapping: dict[Action, int],
         total_action_cost: int,
         ) -> tuple[InstantaneousAction, InstantaneousAction]:
     """
     create new entry action according to the permutation 
-    while setting the appropriate actions
+    while setting the appropriate parameters
     returns (entry action, exit action)
     """
     uuid_action_combination:str = str(uuid4())
@@ -112,6 +118,9 @@ def create_action_according_to_permutation(
     #create entry to exit fluent
     entry_exit_fluent_name = "precon_entry_exit_" + original_action.name + "_" + uuid_action_combination
     entry_exit_fluent = Fluent(entry_exit_fluent_name, BoolType())
+
+    #add fluent to problem
+    modified_problem.add_fluent(entry_exit_fluent, default_initial_value=False)
 
     #create entry action
     entry_action_name ="entry_action_" + original_action.name + "_" + uuid_action_combination
@@ -121,7 +130,7 @@ def create_action_according_to_permutation(
     entry_action.add_effect(entry_exit_fluent, True)
 
     #create entry to map left precondition if choosing this entry
-    action_to_left_precondition_mapping[entry_action_name] = []
+    action_to_left_precondition_mapping[entry_action.name] = (original_action, [])
 
     #set cost for entry appropriately
     _ , left_out_precon = permutation_info(permutation)
@@ -141,20 +150,23 @@ def create_action_according_to_permutation(
     exit_action.add_precondition(entry_exit_fluent)
 
     #add mapping back to original problem
-    modified_grounded_actions_mapping[exit_action_name] = original_action.name
-    grounded_modified_actions_mapping[original_action.name] = exit_action_name
+    modified_grounded_actions_mapping[exit_action.name] = original_action.name
+
+    #add mapping from name to action
+    name_to_action[entry_action_name] = entry_action
+    name_to_action[exit_action_name] = exit_action
 
     #add cost for exit action
     modified_problem_cost_mapping[exit_action] = (cost_mapping_grounded[original_action.name]
         if cost_mapping_grounded[original_action.name] is not None else 0)
 
-    #add all preconditions according to premutation
+    #add all preconditions according to permutation
     for permutation_index, position_value in enumerate(permutation):
         current_precondition = original_action.preconditions[permutation_index]
         if position_value:
             exit_action.add_precondition(current_precondition)
         else:
-            precon_list = action_to_left_precondition_mapping[entry_action_name]
+            (_ ,precon_list) = action_to_left_precondition_mapping[entry_action.name]
             precon_list.append(current_precondition)
 
     return (entry_action, exit_action)
@@ -164,8 +176,8 @@ def create_resulting_actions(
         original_action: InstantaneousAction,
         modified_problem: Problem,
         modified_grounded_actions_mapping: dict[str, str],
-        grounded_modified_actions_mapping: dict[str, str],
-        action_to_left_precondition_mapping: dict[str, list[Fluent]],
+        name_to_action: dict[str, InstantaneousAction],
+        action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[Fluent]]],
         cost_mapping_grounded: dict[str, int],
         modified_problem_cost_mapping: dict[Action, int],
         total_action_cost: int
@@ -180,13 +192,14 @@ def create_resulting_actions(
 
     #go through all possible permutations
     while not all_preconditions_seen:
-        
+
         #create actions for this iteration of permutation
-        entry_action, exit_action = create_action_according_to_permutation(
+        entry_action, exit_action = create_actions_according_to_permutation(
             precondition_permutation,
+            modified_problem,
             original_action,
             modified_grounded_actions_mapping,
-            grounded_modified_actions_mapping,
+            name_to_action,
             action_to_left_precondition_mapping,
             cost_mapping_grounded,
             modified_problem_cost_mapping,
@@ -205,7 +218,7 @@ def create_resulting_actions(
         increase_permutation(precondition_permutation)
 
     #make sure only one action can be executed
-    #by adding atoms to the inital state
+    #by adding atoms to the initial state
     #later deleting atoms when choosing an action
     for fluent, (entry_action, exit_action) in choose_preconditions.items():
         modified_problem.add_fluent(fluent, default_initial_value=True)
