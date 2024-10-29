@@ -58,17 +58,18 @@ def basic_example():
     action1.add_effect(x, False)
     action1.add_effect(y, False)
     action1.add_effect(z, True)
+    action1.add_effect(p, True)
     action2 = InstantaneousAction("action2")
     action2.add_precondition(z)
     action2.add_effect(z, False)
-    action2.add_effect(p, True)
+
     action2.add_effect(q, True)
     #add actions
     problem.add_action(action1)
     problem.add_action(action2)
     #initial values
     problem.add_fluent(x, default_initial_value = True)
-    problem.add_fluent(y, default_initial_value = True)
+    problem.add_fluent(y, default_initial_value = False)
     problem.add_fluent(z, default_initial_value = False)
     problem.add_fluent(p, default_initial_value = False)
     problem.add_fluent(q, default_initial_value = False)
@@ -86,7 +87,7 @@ def basic_example():
     print(pm.plan_info.plan_results.plan.actions)
     print(pm.plan_info.backtracked_grounded_plan_result)
     print(pm.plan_info.left_preconditions)
-    
+    print(pm.plan_info.plan_to_str())
     
     #planer = OneshotPlanner(problem_kind=problem.kind, optimality_guarantee=OptimalityGuarantee.SATISFYING)
     #plan_result = planer.solve(problem)

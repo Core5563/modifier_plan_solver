@@ -45,13 +45,24 @@ def calculate_total_action_cost_metric(problem: Problem) -> Tuple[int, dict[str,
         #increase actions by amount if action cost is set
         #otherwise all actions are set to a cost of 1
         if has_action_cost_metric:
-            action_cost: int = (int(str(action_cost_metric.get_action_cost(action)))
-                if (action_cost_metric.get_action_cost(action) is not None)
-                else 0
-            )
+
+            #check if mapping is there and if not check if default can be used
+            action_cost: int = 0
+            if action_cost_metric.get_action_cost(action) is not None:
+                action_cost = int(str(action_cost_metric.get_action_cost(action)))
+                continue
+            else:
+                if action_cost_mapping.default is not None:
+                    action_cost = action_cost_mapping.default
             action_cost_mapping[action.name] = action_cost
             total_cost += action_cost
         else:
             action_cost_mapping[action.name] = 1
             total_cost += 1
     return (total_cost, action_cost_mapping)
+
+
+def cost_leaving_precondition(problem: Problem) -> int:
+    """action"""
+    total_action_cost , mapping = calculate_total_action_cost_metric(problem)
+    return (total_action_cost * len(mapping))

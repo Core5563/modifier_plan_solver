@@ -65,7 +65,7 @@ class ExpModifier(PlanModifier):
                 action_to_left_precondition_mapping,
                 self.cost_mapping,
                 modified_problem_cost_mapping,
-                self.total_action_cost
+                self.cost_cut_precondition
             )
         modified_problem.add_quality_metric(MinimizeActionCosts(modified_problem_cost_mapping, default = 1))
         return ModifiedProblemInfo(
@@ -106,7 +106,7 @@ def create_actions_according_to_permutation(
         action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[Fluent]]],
         cost_mapping_grounded: dict[str, int],
         modified_problem_cost_mapping: dict[Action, int],
-        total_action_cost: int,
+        cost_cut_precondition: int,
         ) -> tuple[InstantaneousAction, InstantaneousAction]:
     """
     create new entry action according to the permutation 
@@ -135,9 +135,7 @@ def create_actions_according_to_permutation(
     #set cost for entry appropriately
     _ , left_out_precon = permutation_info(permutation)
     total_amount_of_actions_grounded_problem = len(cost_mapping_grounded)
-    cost_of_entry_action = (left_out_precon
-        * total_amount_of_actions_grounded_problem
-        * total_action_cost)
+    cost_of_entry_action = (left_out_precon * cost_cut_precondition)
     modified_problem_cost_mapping[entry_action] = cost_of_entry_action
 
     #create exit condition
@@ -180,7 +178,7 @@ def create_resulting_actions(
         action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[Fluent]]],
         cost_mapping_grounded: dict[str, int],
         modified_problem_cost_mapping: dict[Action, int],
-        total_action_cost: int
+        cost_cut_precondition: int
 ) -> None:
     """create all actions with all permutations of the current action """
     #create permutation | True = use precondition
@@ -203,7 +201,7 @@ def create_resulting_actions(
             action_to_left_precondition_mapping,
             cost_mapping_grounded,
             modified_problem_cost_mapping,
-            total_action_cost
+            cost_cut_precondition
         )
 
         #create fluent and add mapping

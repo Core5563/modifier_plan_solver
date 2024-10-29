@@ -1,24 +1,23 @@
 """Import for abstract classes """
 from abc import ABC, abstractmethod
+from typing import Callable
 from unified_planning.model import Problem
-from unified_planning.plans import ActionInstance
 from unified_planning.shortcuts import OneshotPlanner, OptimalityGuarantee, InstantaneousAction, Fluent
 from unified_planning.engines.results import CompilerResult, PlanGenerationResult, PlanGenerationResultStatus
-from .modifier_util import read_problem_from_file, ground_problem, calculate_total_action_cost_metric
+from .modifier_util import read_problem_from_file, ground_problem, calculate_total_action_cost_metric, cost_leaving_precondition
 from .modified_plan import ModifiedProblemInfo, ModifiedPlanInformation
 
 
 class PlanModifier(ABC):
     """abstract base class for modification of a Problem"""
-    def __init__(self, problem: Problem):
+    def __init__(self, problem: Problem, calc_leave_precon: Callable[Problem, int] = cost_leaving_precondition):
         #remember original problem
         self.original_problem: Problem = problem
         #ground the problem
         self.grounded_information: CompilerResult = ground_problem(problem)
-        #calculate cost information
-        total_cost, mapping = calculate_total_action_cost_metric(self.grounded_information.problem)
-        #assign cost information
-        self.total_action_cost: int = total_cost
+        #calculate and assign cost information
+        _ , mapping = calculate_total_action_cost_metric(self.grounded_information.problem)
+        self.cost_cut_precondition: int = calc_leave_precon(self.grounded_information.problem)
         self.cost_mapping: dict[str, int] = mapping
         #create altered plan
         self.modified_problem_info: ModifiedProblemInfo = self._transform_grounded_plan()
@@ -51,7 +50,7 @@ class PlanModifier(ABC):
             for action_instance in plan_results.plan.actions:
                 if action_instance.action.name in self.modified_problem_info.action_to_left_precondition_mapping:
                     (original_grounded_action, list_of_left_preconditions) = self.modified_problem_info.action_to_left_precondition_mapping[action_instance.action.name]
-                    left_preconditions[original_grounded_action] = list_of_left_preconditions
+                    left_preconditions[original_grounded_action.name] = list_of_left_preconditions
                 
                 if action_instance.action.name in self.modified_problem_info.modified_grounded_actions_mapping:
                     backtracked_grounded_plan_with_left_preconditions.append(self.modified_problem_info.modified_grounded_actions_mapping[action_instance.action.name])

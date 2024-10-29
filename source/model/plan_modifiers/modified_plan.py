@@ -1,11 +1,7 @@
 """imports for Problem """
-from typing import Optional
-from collections import OrderedDict
 from unified_planning.model import Problem
 from unified_planning.engines import PlanGenerationResult
-from unified_planning.shortcuts import InstantaneousAction, Action, Fluent
-from unified_planning.environment import Environment
-import unified_planning
+from unified_planning.shortcuts import InstantaneousAction, Fluent
 
 class ModifiedProblemInfo:
     """class to hold all info regarding the transformed problem"""
@@ -34,3 +30,13 @@ class ModifiedPlanInformation():
         self.left_preconditions: dict[str, tuple[InstantaneousAction, list[Fluent]]] = left_preconditions
         #list starting from first Action determining which action is actually used
         self.backtracked_grounded_plan_result: list[InstantaneousAction] = backtracked_grounded_plan_result
+
+    def plan_to_str(self) -> str:
+        """print plan """
+        print_str: str = ""
+        for action_name in self.backtracked_grounded_plan_result:
+            print_str += action_name+ "\n"
+            left_precons: list[Fluent] = self.left_preconditions[action_name] if self.left_preconditions[action_name] else []
+            for precon in left_precons:
+                print_str += " - " + str(precon) + "\n"
+        return print_str
