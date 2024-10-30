@@ -3,6 +3,7 @@ from unified_planning.shortcuts import *
 #import unified_planning.shortcuts as us
 from unified_planning.engines.results import CompilerResult
 from source.model.plan_modifiers.exp_modifier import ExpModifier, permutation_info
+from source.model.plan_modifiers.lin_modifier import LinModifier
 
 
 def testReadInFromFile():
@@ -77,7 +78,8 @@ def basic_example():
     problem.add_goal(p)
     problem.add_goal(q)
     
-    pm = ExpModifier(problem)
+    #pm = ExpModifier(problem)
+    pm = LinModifier(problem)
     #print(pm.modified_problem_info.action_to_left_precondition_mapping)
     #print(pm.modified_problem_info.modified_grounded_actions_mapping)
     #print(pm.modified_problem_info.grounded_modified_actions_mapping)

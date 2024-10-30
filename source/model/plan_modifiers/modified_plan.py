@@ -36,7 +36,10 @@ class ModifiedPlanInformation():
         print_str: str = ""
         for action_name in self.backtracked_grounded_plan_result:
             print_str += action_name+ "\n"
-            left_precons: list[Fluent] = self.left_preconditions[action_name] if self.left_preconditions[action_name] else []
+            left_precons: list[Fluent] = (
+                self.left_preconditions[action_name] 
+                if (action_name in self.left_preconditions) 
+                else [])
             for precon in left_precons:
                 print_str += " - " + str(precon) + "\n"
         return print_str

@@ -65,7 +65,9 @@ def action_name_in_dict(
     return False
 
 
-def return_action_by_name(name: str, dictionary: dict[InstantaneousAction, InstantaneousAction]) -> InstantaneousAction:
+def return_action_by_name(
+        name: str,
+        dictionary: dict[InstantaneousAction, InstantaneousAction]) -> InstantaneousAction:
     "returns the mapped action by the name of the given action"
     for action_in_dict, mapped_action in dictionary.items():
         if name == action_in_dict.name:
