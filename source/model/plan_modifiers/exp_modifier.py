@@ -22,10 +22,8 @@ class ExpModifier(PlanModifier):
 
         #create mappings for backtracking later
         modified_grounded_actions_mapping = dict[str, str]()
-        grounded_modified_actions_mapping = dict[str, str]()
         action_to_left_precondition_mapping = dict[str, tuple[InstantaneousAction, list[Fluent]]]()
         name_to_action = dict[str, InstantaneousAction]()
-        
 
         for action in problem.actions:
             if not isinstance(action, InstantaneousAction):
@@ -43,7 +41,6 @@ class ExpModifier(PlanModifier):
 
                 #remember mapping via names
                 modified_grounded_actions_mapping[new_action_name] = inst_action.name
-                grounded_modified_actions_mapping[inst_action.name] = new_action_name
 
                 #add action to new problem
                 modified_problem.add_action(new_action)
@@ -67,7 +64,11 @@ class ExpModifier(PlanModifier):
                 modified_problem_cost_mapping,
                 self.cost_cut_precondition
             )
-        modified_problem.add_quality_metric(MinimizeActionCosts(modified_problem_cost_mapping, default = 1))
+        #add quality metric
+        modified_problem.add_quality_metric(
+            MinimizeActionCosts(modified_problem_cost_mapping, default = 1))
+
+        #return modified problem
         return ModifiedProblemInfo(
             modified_problem,
             modified_grounded_actions_mapping,
@@ -116,7 +117,11 @@ def create_actions_according_to_permutation(
     uuid_action_combination:str = str(uuid4())
 
     #create entry to exit fluent
-    entry_exit_fluent_name = "precon_entry_exit_" + original_action.name + "_" + uuid_action_combination
+    entry_exit_fluent_name = (
+        "precon_entry_exit_" 
+        + original_action.name
+        + "_"
+        + uuid_action_combination)
     entry_exit_fluent = Fluent(entry_exit_fluent_name, BoolType())
 
     #add fluent to problem

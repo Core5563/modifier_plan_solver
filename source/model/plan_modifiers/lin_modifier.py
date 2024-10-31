@@ -4,8 +4,8 @@ from .plan_modifier import PlanModifier
 from .modified_plan import ModifiedProblemInfo
 
 class LinModifier(PlanModifier):
-   """creates Modified Plan by adding actions linear to preconditions """
-   def  _transform_grounded_plan(self) -> ModifiedProblemInfo:
+    """creates Modified Plan by adding actions linear to preconditions """
+    def  _transform_grounded_plan(self) -> ModifiedProblemInfo:
         #clone the problem
         problem: Problem = self.grounded_information.problem
         modified_problem = problem.clone()
@@ -19,13 +19,14 @@ class LinModifier(PlanModifier):
 
         #create mappings for backtracking later
         modified_grounded_actions_mapping = dict[str, str]()
-        grounded_modified_actions_mapping = dict[str, str]()
         action_to_left_precondition_mapping = dict[str, tuple[InstantaneousAction, list[Fluent]]]()
         name_to_action = dict[str, InstantaneousAction]()
 
         #create dictionary with first entries for fluents
         precon_to_changed_precon: dict[str, list[Fluent]] = dict[str, tuple[Fluent, list[Fluent]]]()
-        negative_effect_mapping: dict[str, tuple[Fluent, list[InstantaneousAction]]] = dict[Fluent, list[InstantaneousAction]]()
+        negative_effect_mapping: dict[str, tuple[Fluent, list[InstantaneousAction]]] = (
+            dict[Fluent, list[InstantaneousAction]]())
+
         for fluent in problem.fluents:
             precon_to_changed_precon[str(fluent.name)] = (fluent, [])
             negative_effect_mapping[str(fluent.name)] = (fluent, [])
@@ -69,6 +70,7 @@ def create_resulting_actions(
         precon_to_changed_precon: dict[Fluent, list[Fluent]],
         negative_effect_mapping: dict[Fluent, list[InstantaneousAction]]
 ) -> list[InstantaneousAction]:
+    """create actions for that """
     #list to return later
     action_list: list[InstantaneousAction] = []
 
@@ -165,7 +167,6 @@ def create_resulting_actions(
         modified_problem_cost_mapping[leave_one_time_precondition_action] = cost_cut_precondition
 
         #mapping of precondition
-        print(precon_to_changed_precon)
         _ , list_of_new_precons = precon_to_changed_precon[str(current_precondition)]
         list_of_new_precons.append(precondition_fluent)
 
