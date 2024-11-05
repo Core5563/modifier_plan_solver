@@ -7,11 +7,11 @@ from unified_planning.engines.results import CompilerResult
 from unified_planning.model.metrics import MinimizeActionCosts
 
 
-
-def read_problem_from_file(domain_filepath:str, problem_filepath:str):
+def read_problem_from_file(domain_filepath:str, problem_filepath:str) -> Problem:
     """read in Problem from .pddl domain and problem file """
     reader = PDDLReader()
     return reader.parse_problem(domain_filepath, problem_filepath)
+
 
 def ground_problem(problem: Problem) -> CompilerResult:
     """
@@ -23,6 +23,7 @@ def ground_problem(problem: Problem) -> CompilerResult:
     compiler_result: CompilerResult = compiler.compile(problem,
         compilation_kind = CompilationKind.GROUNDING)
     return compiler_result
+
 
 def calculate_total_action_cost_metric(problem: Problem) -> Tuple[int, dict[str, int]]:
     """
