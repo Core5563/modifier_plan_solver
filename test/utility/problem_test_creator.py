@@ -12,7 +12,10 @@ class TestProblemCreator:
     def solvable_basic() -> Problem:
         return ProblemCreator.create_problem(
             [("x", True), ("y", True), ("z", True), ("p", False), ("q", False)],
-            [("action1", ["x", "y"], [("z", True)])],
+            [
+                ("action1", ["x", "y"], [("z", True), ("p", True)]),
+                ("action2", ["z"], [("q", True)])
+            ],
             ["p", "q"]
         )
 
@@ -20,6 +23,9 @@ class TestProblemCreator:
     def unsolvable_basic() -> Problem:
         return ProblemCreator.create_problem(
             [("x", True), ("y", False), ("z", True), ("p", False), ("q", False)],
-            [("action1", ["x", "y"], [("z", True)])],
+            [
+                ("action1", ["x", "y"], [("z", True), ("p", True)]),
+                ("action2", ["z"], [("q", True)])
+             ],
             ["p", "q"]
         )

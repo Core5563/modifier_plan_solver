@@ -56,3 +56,5 @@ class ProblemCreator:
                 raise ValueError("unknown Goal Variable. Goal Variables must be in Variable list")
             goal_var = name_to_fluent[goal_var_name]
             problem.add_goal(goal_var)
+
+        return problem
