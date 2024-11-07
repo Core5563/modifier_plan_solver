@@ -67,5 +67,5 @@ def calculate_total_action_cost_metric(problem: Problem) -> tuple[int, dict[str,
 
 
 def cost_leaving_precondition(problem: Problem) -> int:
-    total_action_cost , mapping = calculate_total_action_cost_metric(problem)
+    total_action_cost, mapping = calculate_total_action_cost_metric(problem)
     return total_action_cost * len(mapping)
