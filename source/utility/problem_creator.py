@@ -6,12 +6,12 @@ class ProblemCreator:
     """ creates basic problems from string names"""
 
     # error messages
-    VARIABLE_NAME_NOT_UNIQUE_ERROR_MESSAGE = "Variable Names must be unique"
-    ACTION_NAME_NOT_UNIQUE_ERROR_MESSAGE = "Actions names must be unique"
-    PRECONDITION_IS_UNKNOWN_ERROR_MESSAGE = "unknown Precondition. Preconditions must be in variable list"
-    EFFECT_IS_UNKNOWN_ERROR_MESSAGE = "unknown Effect. Effect Variables must be in variable list"
-    COST_UNKNOWN_ACTION_ERROR_MESSAGE = "cost for unknown action specified"
-    GOAL_UNKNOWN_ERROR_MESSAGE = "unknown Goal Variable. Goal Variables must be in Variable list"
+    VARIABLE_NAME_NOT_UNIQUE_ERROR_MESSAGE = "variable names must be unique."
+    ACTION_NAME_NOT_UNIQUE_ERROR_MESSAGE = "actions names must be unique."
+    PRECONDITION_IS_UNKNOWN_ERROR_MESSAGE = "unknown precondition. preconditions must be in variable list."
+    EFFECT_IS_UNKNOWN_ERROR_MESSAGE = "unknown effect. effect Variables must be in variable list."
+    COST_UNKNOWN_ACTION_ERROR_MESSAGE = "cost for unknown action specified."
+    GOAL_UNKNOWN_ERROR_MESSAGE = "unknown goal variable. goal variables must be in variable list."
 
     def __init__(
             self,
@@ -41,7 +41,7 @@ class ProblemCreator:
         for var_name, initial_value in variables:
             # raise error on same variable Name
             if var_name in name_to_fluent:
-                raise ValueError(ProblemCreator.VARIABLE_NAME_NOT_UNIQUE_ERROR_MESSAGE)
+                raise ValueError(ProblemCreator.VARIABLE_NAME_NOT_UNIQUE_ERROR_MESSAGE + " name: " + var_name)
             new_fluent = Fluent(var_name, BoolType())
             name_to_fluent[var_name] = new_fluent
             problem.add_fluent(new_fluent, default_initial_value=initial_value)
@@ -54,20 +54,20 @@ class ProblemCreator:
         for action_name, precondition_list, effect_list in actions:
             # raise error if name for action used more than one time
             if action_name in name_to_action:
-                raise ValueError(ProblemCreator.ACTION_NAME_NOT_UNIQUE_ERROR_MESSAGE)
+                raise ValueError(ProblemCreator.ACTION_NAME_NOT_UNIQUE_ERROR_MESSAGE + " name: " + action_name)
             new_action = InstantaneousAction(action_name)
 
             # add preconditions
             for precondition_name in precondition_list:
                 if precondition_name not in name_to_fluent:
-                    raise ValueError(ProblemCreator.PRECONDITION_IS_UNKNOWN_ERROR_MESSAGE)
+                    raise ValueError(ProblemCreator.PRECONDITION_IS_UNKNOWN_ERROR_MESSAGE + " name: " + precondition_name)
                 precondition_fluent = name_to_fluent[precondition_name]
                 new_action.add_precondition(precondition_fluent)
 
             # add effects
             for effect_name, effect_result in effect_list:
                 if effect_name not in name_to_fluent:
-                    raise ValueError(ProblemCreator.EFFECT_IS_UNKNOWN_ERROR_MESSAGE)
+                    raise ValueError(ProblemCreator.EFFECT_IS_UNKNOWN_ERROR_MESSAGE + " name: " + effect_name)
                 effect_fluent = name_to_fluent[effect_name]
                 new_action.add_effect(effect_fluent, effect_result)
 
@@ -83,13 +83,13 @@ class ProblemCreator:
         # add cost metric
         for action_name, action_cost in cost_dict.items():
             if action_name not in name_to_action:
-                raise ValueError(ProblemCreator.COST_UNKNOWN_ACTION_ERROR_MESSAGE)
+                raise ValueError(ProblemCreator.COST_UNKNOWN_ACTION_ERROR_MESSAGE + " name: " + action_name)
         problem.add_quality_metric(MinimizeActionCosts(cost_metric_dict, default=default_cost))
 
         # add goal
         for goal_var_name in goal:
             if goal_var_name not in name_to_fluent:
-                raise ValueError(ProblemCreator.GOAL_UNKNOWN_ERROR_MESSAGE)
+                raise ValueError(ProblemCreator.GOAL_UNKNOWN_ERROR_MESSAGE + " name: " + goal_var_name)
             goal_var = name_to_fluent[goal_var_name]
             problem.add_goal(goal_var)
 
