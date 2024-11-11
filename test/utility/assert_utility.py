@@ -1,9 +1,5 @@
-from unified_planning.shortcuts import Problem, InstantaneousAction, FNode, EffectKind, Effect
-
-
-def action_with_name_part_in_problem(problem: Problem) -> bool:
-    pass
-
+"""unified planning imports"""
+from unified_planning.shortcuts import InstantaneousAction #type:ignore
 
 def precondition_in_action(precondition_names: list[str], action: InstantaneousAction) -> bool:
     """check if the name of a precondition is in a problem"""
@@ -22,7 +18,8 @@ def precondition_in_action(precondition_names: list[str], action: InstantaneousA
 
 
 def effect_in_action(effects: list[tuple[str, bool]], action: InstantaneousAction) -> bool:
-    for effect_name, effect_result in effects:
+    """return if the list of the effects are in the given action"""
+    for effect_name, _ in effects:
         if effect_name not in [str(effect.fluent) for effect in action.effects]:
             return False
 

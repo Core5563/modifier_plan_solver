@@ -1,5 +1,5 @@
-from unified_planning.shortcuts import Action, InstantaneousAction, Problem, Fluent, BoolType, MinimizeActionCosts
 from uuid import uuid4
+from unified_planning.shortcuts import Action, InstantaneousAction, Problem, Fluent, BoolType, MinimizeActionCosts #type: ignore
 from .plan_modifier import PlanModifier
 from .modified_plan import ModifiedProblemInfo
 
@@ -23,9 +23,9 @@ class LinModifier(PlanModifier):
         name_to_action = dict[str, InstantaneousAction]()
 
         #create dictionary with first entries for fluents
-        precon_to_changed_precon: dict[str, list[Fluent]] = dict[str, tuple[Fluent, list[Fluent]]]()
+        precon_to_changed_precon: dict[str, tuple[Fluent, list[Fluent]]] = dict[str, tuple[Fluent, list[Fluent]]]()
         negative_effect_mapping: dict[str, tuple[Fluent, list[InstantaneousAction]]] = (
-            dict[Fluent, list[InstantaneousAction]]())
+            dict[str, tuple[Fluent, list[InstantaneousAction]]]())
 
         for fluent in problem.fluents:
             precon_to_changed_precon[str(fluent.name)] = (fluent, [])
@@ -67,8 +67,8 @@ def create_resulting_actions(
         cost_mapping_grounded: dict[str, int],
         modified_problem_cost_mapping: dict[Action, int],
         cost_cut_precondition: int,
-        precon_to_changed_precon: dict[Fluent, list[Fluent]],
-        negative_effect_mapping: dict[Fluent, list[InstantaneousAction]]
+        precon_to_changed_precon: dict[str, tuple[Fluent, list[Fluent]]],
+        negative_effect_mapping: dict[str, tuple[Fluent, list[InstantaneousAction]]]
 ) -> list[InstantaneousAction]:
     """create actions for that """
     #list to return later
@@ -78,9 +78,9 @@ def create_resulting_actions(
     uuid_name_modifier = str(uuid4())
 
     #create unified action
-    exit_action_name = "exit_" + original_action._name + "_" + uuid_name_modifier
+    exit_action_name = "exit_" + original_action.name + "_" + uuid_name_modifier
     exit_action = original_action.clone()
-    exit_action._name = exit_action_name
+    exit_action.name = exit_action_name
     exit_action.clear_preconditions()
 
     #mapping
@@ -101,25 +101,25 @@ def create_resulting_actions(
         #create fluent
         precondition_fluent_name = (
             "precon_" + str(current_precondition) 
-            + "_" + original_action._name + "_" + uuid_name_modifier)
+            + "_" + original_action.name + "_" + uuid_name_modifier)
         precondition_fluent = Fluent(precondition_fluent_name, BoolType())
 
         #make taking precondition Action
         take_precondition_action_name = (
             "take_precon_" + str(current_precondition) 
-            + "_" + original_action._name + "_" + uuid_name_modifier)
+            + "_" + original_action.name + "_" + uuid_name_modifier)
         take_precondition_action = InstantaneousAction(take_precondition_action_name)
 
         #create choose precondition
         choose_take_precondition_fluent_name = (
             "choose_take_precon_" + str(current_precondition) 
-            + "_" + original_action._name + "_" + uuid_name_modifier)
+            + "_" + original_action.name + "_" + uuid_name_modifier)
         choose_take_precondition_fluent = Fluent(choose_take_precondition_fluent_name, BoolType())
 
         #create one-time leave precondition action
         leave_one_time_precondition_action_name = (
             "leave_one_time_precon_" + str(current_precondition) 
-            + "_" + original_action._name + "_" + uuid_name_modifier)
+            + "_" + original_action.name + "_" + uuid_name_modifier)
         leave_one_time_precondition_action = InstantaneousAction(
             leave_one_time_precondition_action_name)
         #mapping to left precondition
@@ -129,13 +129,13 @@ def create_resulting_actions(
         #create leave precondition action
         leave_precondition_action_name = (
             "leave_precon_" + str(current_precondition) 
-            + "_" + original_action._name + "_" + uuid_name_modifier)
+            + "_" + original_action.name + "_" + uuid_name_modifier)
         leave_precondition_action = InstantaneousAction(leave_precondition_action_name)
 
         #create one_time to often leave precondition fluent
         connect_leave_precondition_fluent_name = (
             "connect_leave_precon_" + str(current_precondition) 
-            + "_" + original_action._name + "_" + uuid_name_modifier)
+            + "_" + original_action.name + "_" + uuid_name_modifier)
         connect_leave_precondition_fluent = Fluent(
             connect_leave_precondition_fluent_name,
             BoolType())
@@ -143,7 +143,7 @@ def create_resulting_actions(
         #create choosing to leave precondition fluent
         choose_leave_precondition_fluent_name = (
             "choose_leave_precon_" + str(current_precondition) 
-            + "_" + original_action._name + "_" + uuid_name_modifier)
+            + "_" + original_action.name + "_" + uuid_name_modifier)
         choose_leave_precondition_fluent = Fluent(choose_leave_precondition_fluent_name, BoolType())
 
         #add fluents to actions

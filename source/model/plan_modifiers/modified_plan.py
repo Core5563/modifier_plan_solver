@@ -1,7 +1,7 @@
 """imports for Problem """
-from unified_planning.model import Problem
-from unified_planning.engines import PlanGenerationResult
-from unified_planning.shortcuts import InstantaneousAction, Fluent
+from unified_planning.model import Problem #type: ignore
+from unified_planning.engines import PlanGenerationResult #type: ignore
+from unified_planning.shortcuts import InstantaneousAction, Fluent #type: ignore
 
 class ModifiedProblemInfo:
     """class to hold all info regarding the transformed problem"""
@@ -39,7 +39,7 @@ class ModifiedPlanInformation():
             left_precons: list[Fluent] = (
                 self.left_preconditions[action_name] 
                 if (action_name in self.left_preconditions) 
-                else [])
+                else []) #type: ignore
             for precon in left_precons:
                 print_str += " - " + str(precon) + "\n"
         return print_str

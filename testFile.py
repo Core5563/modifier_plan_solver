@@ -1,7 +1,8 @@
 from source.model.plan_modifiers.modifier_util import read_problem_from_file, ground_problem, calculate_total_action_cost_metric
-from unified_planning.shortcuts import *
+from source.utility.problem_creator import  ProblemCreator
+from unified_planning.shortcuts import * #type: ignore
 #import unified_planning.shortcuts as us
-from unified_planning.engines.results import CompilerResult
+from unified_planning.engines.results import CompilerResult #type:ignore
 from source.model.plan_modifiers.exp_modifier import ExpModifier, permutation_info
 from source.model.plan_modifiers.lin_modifier import LinModifier
 
@@ -96,9 +97,20 @@ def basic_example():
     #planer = OneshotPlanner(problem_kind=pm.modified_problem_info.problem.kind, optimality_guarantee=OptimalityGuarantee.SOLVED_OPTIMALLY)
     #plan_result = planer.solve(pm.modified_problem_info.problem)
     #print(plan_result)
-    pass
 
-
+def basic_unsolvable():
+    problem = ProblemCreator.create_problem(
+        [("x", True), ("y", False), ("z", False), ("p", False), ("q", False)],
+        [
+            ("a1", ["x", "y"], [("z", True), ("p", True), ("q", False)]),
+            ("a2", ["z"], [("q", True), ("p", False)])
+         ],
+        ["p", "q"]
+    )
+    pm = ExpModifier(problem)
+    pm.try_solving_plan()
+    print("here")
+    print(pm.plan_info.plan_results.status)
 
 if __name__ == '__main__':
     #testReadInFromFile()
@@ -106,4 +118,5 @@ if __name__ == '__main__':
     #readInWithActionCost()
     #instantiatePlanModifier()
     #permutationTest()
-    basic_example()
+    #basic_example()
+    basic_unsolvable()

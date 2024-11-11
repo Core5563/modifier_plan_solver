@@ -1,5 +1,6 @@
-from unified_planning.model import Problem, Fluent
-from unified_planning.shortcuts import BoolType, InstantaneousAction, MinimizeActionCosts
+"""imports from unified planning"""
+from unified_planning.model import Problem, Fluent #type: ignore
+from unified_planning.shortcuts import BoolType, InstantaneousAction, MinimizeActionCosts #type: ignore
 
 
 class ProblemCreator:
@@ -16,17 +17,23 @@ class ProblemCreator:
     def __init__(
             self,
             variables: list[tuple[str, bool]],
-            actions: list[tuple[str, list[str],list[tuple[str, bool]]]],
+            actions: list[tuple[str, list[str], list[tuple[str, bool]]]],
             goal: list[str]):
         self.problem: Problem = self.create_problem(variables, actions, goal)
 
     @staticmethod
     def create_problem(
-            variables:list[tuple[str, bool]],
-            actions:list[tuple[str, list[str], list[tuple[str, bool]]]],
+            variables: list[tuple[str, bool]],
+            actions: list[tuple[str, list[str], list[tuple[str, bool]]]],
             goal: list[str],
             cost_dict: dict[str, int] | None = None,
             default_cost: int = 1) -> Problem:
+        """
+        create STRIPS Problems
+        @variables list of variables with the initial boolean value (string_name, bool_init_value)
+        @actions list of actions action = (string_name, list_precondition, list_of_effects)
+        @goal list of goal vars
+        """
         # check if no argument given
         if cost_dict is None:
             cost_dict = dict[str, int]()
@@ -60,7 +67,8 @@ class ProblemCreator:
             # add preconditions
             for precondition_name in precondition_list:
                 if precondition_name not in name_to_fluent:
-                    raise ValueError(ProblemCreator.PRECONDITION_IS_UNKNOWN_ERROR_MESSAGE + " name: " + precondition_name)
+                    raise ValueError(
+                        ProblemCreator.PRECONDITION_IS_UNKNOWN_ERROR_MESSAGE + " name: " + precondition_name)
                 precondition_fluent = name_to_fluent[precondition_name]
                 new_action.add_precondition(precondition_fluent)
 
@@ -81,7 +89,7 @@ class ProblemCreator:
             problem.add_action(new_action)
 
         # add cost metric
-        for action_name, action_cost in cost_dict.items():
+        for action_name, _ in cost_dict.items():
             if action_name not in name_to_action:
                 raise ValueError(ProblemCreator.COST_UNKNOWN_ACTION_ERROR_MESSAGE + " name: " + action_name)
         problem.add_quality_metric(MinimizeActionCosts(cost_metric_dict, default=default_cost))

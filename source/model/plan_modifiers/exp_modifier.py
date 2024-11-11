@@ -1,6 +1,6 @@
 """ Imports"""
 from uuid import uuid4
-from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Fluent, BoolType
+from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Fluent, BoolType #type: ignore
 from .plan_modifier import PlanModifier
 from .modified_plan import ModifiedProblemInfo
 
@@ -37,7 +37,7 @@ class ExpModifier(PlanModifier):
 
                 #create the new action
                 new_action = inst_action.clone()
-                new_action._name = new_action_name
+                new_action.name = new_action_name
 
                 #remember mapping via names
                 modified_grounded_actions_mapping[new_action_name] = inst_action.name
@@ -139,14 +139,13 @@ def create_actions_according_to_permutation(
 
     #set cost for entry appropriately
     _ , left_out_precon = permutation_info(permutation)
-    total_amount_of_actions_grounded_problem = len(cost_mapping_grounded)
-    cost_of_entry_action = (left_out_precon * cost_cut_precondition)
+    cost_of_entry_action = left_out_precon * cost_cut_precondition
     modified_problem_cost_mapping[entry_action] = cost_of_entry_action
 
     #create exit condition
     exit_action = original_action.clone()
     exit_action_name ="exit_action_" + original_action.name + "_" + uuid_action_combination
-    exit_action._name = exit_action_name
+    exit_action.name = exit_action_name
     exit_action.clear_preconditions()
 
     #add precondition for exit_action

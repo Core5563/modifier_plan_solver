@@ -1,10 +1,9 @@
 """import for reading in files"""
-from typing import Tuple
-from unified_planning.io import PDDLReader
-from unified_planning.model import Problem
-from unified_planning.shortcuts import Compiler, CompilationKind
-from unified_planning.engines.results import CompilerResult
-from unified_planning.model.metrics import MinimizeActionCosts
+from unified_planning.io import PDDLReader #type: ignore
+from unified_planning.model import Problem #type: ignore
+from unified_planning.shortcuts import Compiler, CompilationKind #type: ignore
+from unified_planning.engines.results import CompilerResult #type: ignore
+from unified_planning.model.metrics import MinimizeActionCosts #type: ignore
 
 
 def read_problem_from_file(domain_filepath:str, problem_filepath:str) -> Problem:
@@ -54,7 +53,6 @@ def calculate_total_action_cost_metric(problem: Problem) -> tuple[int, dict[str,
             action_cost: int = 0
             if action_cost_metric.get_action_cost(action) is not None:
                 action_cost = int(str(action_cost_metric.get_action_cost(action)))
-                continue
             else:
                 if action_cost_metric.default is not None:
                     action_cost = action_cost_metric.default
