@@ -8,7 +8,7 @@ from .modifier_util import read_problem_from_file, ground_problem, calculate_tot
 from .modified_plan import ModifiedProblemInfo, ModifiedPlanInformation
 
 
-class PlanModifier(ABC):
+class ProblemModifier(ABC):
     """abstract base class for modification of a Problem"""
     def __init__(self, problem: Problem, calc_leave_precon: Callable[Problem, int] = cost_leaving_precondition):
         #remember original problem

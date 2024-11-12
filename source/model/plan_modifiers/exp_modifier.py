@@ -1,10 +1,10 @@
 """ Imports"""
 from uuid import uuid4
 from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Fluent, BoolType #type: ignore
-from .plan_modifier import PlanModifier
+from .problem_modifier import ProblemModifier
 from .modified_plan import ModifiedProblemInfo
 
-class ExpModifier(PlanModifier):
+class ExpModifier(ProblemModifier):
     """Plan Modifier actions are permuted according to its preconditions"""
     #def __init__(self, problem: Problem):
     #    PlanModifier.__init__(self, problem)

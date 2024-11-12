@@ -2,10 +2,10 @@
 from uuid import uuid4
 from unified_planning.shortcuts import ( #type: ignore
     Action, InstantaneousAction, Problem, Fluent, BoolType, MinimizeActionCosts)
-from .plan_modifier import PlanModifier
+from .problem_modifier import ProblemModifier
 from .modified_plan import ModifiedProblemInfo
 
-class LinModifier(PlanModifier):
+class LinModifier(ProblemModifier):
     """creates Modified Plan by adding actions linear to preconditions """
     def  _transform_grounded_plan(self) -> ModifiedProblemInfo:
         #clone the problem
