@@ -1,5 +1,7 @@
+"""imports for planning"""
 from uuid import uuid4
-from unified_planning.shortcuts import Action, InstantaneousAction, Problem, Fluent, BoolType, MinimizeActionCosts #type: ignore
+from unified_planning.shortcuts import ( #type: ignore
+    Action, InstantaneousAction, Problem, Fluent, BoolType, MinimizeActionCosts)
 from .plan_modifier import PlanModifier
 from .modified_plan import ModifiedProblemInfo
 
@@ -23,7 +25,8 @@ class LinModifier(PlanModifier):
         name_to_action = dict[str, InstantaneousAction]()
 
         #create dictionary with first entries for fluents
-        precon_to_changed_precon: dict[str, tuple[Fluent, list[Fluent]]] = dict[str, tuple[Fluent, list[Fluent]]]()
+        precon_to_changed_precon: dict[str, tuple[Fluent, list[Fluent]]] = (
+            dict[str, tuple[Fluent, list[Fluent]]]())
         negative_effect_mapping: dict[str, tuple[Fluent, list[InstantaneousAction]]] = (
             dict[str, tuple[Fluent, list[InstantaneousAction]]]())
 
@@ -48,8 +51,9 @@ class LinModifier(PlanModifier):
                 negative_effect_mapping
             )
             modified_problem.add_actions(created_actions)
-        
-        modified_problem.add_quality_metric(MinimizeActionCosts(modified_problem_cost_mapping, default = 1))
+
+        modified_problem.add_quality_metric(
+            MinimizeActionCosts(modified_problem_cost_mapping, default = 1))
 
         return ModifiedProblemInfo(
             modified_problem,

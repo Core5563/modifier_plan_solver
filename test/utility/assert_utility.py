@@ -32,6 +32,8 @@ def effect_in_action(effects: list[tuple[str, bool]], action: InstantaneousActio
 
         # check if actual is expected
         actual_bool_value = effect.value.bool_constant_value()
-        if not ((actual_bool_value and expected_bool_value) or (not actual_bool_value and not expected_bool_value)):
+        if not (
+                (actual_bool_value and expected_bool_value)
+                or (not actual_bool_value and not expected_bool_value)):
             return False
     return True
