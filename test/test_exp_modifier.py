@@ -1,12 +1,10 @@
 """test exp_modifier component"""
-import pytest
 from test.utility.assert_utility import exp_modifier_actions_correct
 from source.model.plan_modifiers.exp_modifier import ExpModifier
 from source.utility.problem_creator import ProblemCreator
 
 
-#@pytest.mark.skip(reason= "test setup not there yet")
-def test_exp_modifier_actions():
+def test_exp_modifier_actions() -> None:
     """check if actions are correct"""
     problem = ProblemCreator.create_problem(
         [

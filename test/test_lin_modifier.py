@@ -4,7 +4,7 @@ from source.utility.problem_creator import ProblemCreator
 from source.model.plan_modifiers.lin_modifier import LinModifier
 from test.utility.assert_utility import lin_actions_in_modifier_correct
 
-def test_lin_modifier_actions():
+def test_lin_modifier_actions() -> None:
     """check if actions are correct"""
     problem: Problem = ProblemCreator.create_problem(
         [
