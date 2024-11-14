@@ -86,8 +86,8 @@ def basic_example():
     problem.add_goal(p)
     problem.add_goal(q)
 
-    # pm = ExpModifier(problem)
-    pm = LinModifier(problem)
+    pm = ExpModifier(problem)
+    #pm = LinModifier(problem)
     # print(pm.modified_problem_info.action_to_left_precondition_mapping)
     # print(pm.modified_problem_info.modified_grounded_actions_mapping)
     print(pm.modified_problem_info.problem)
@@ -97,8 +97,6 @@ def basic_example():
     print(pm.plan_info.backtracked_grounded_plan_result)
     print(pm.plan_info.left_preconditions)
     print(pm.plan_info.plan_to_str())
-
-    pass
 
 
 def basic_unsolvable():
@@ -114,10 +112,45 @@ def basic_unsolvable():
     pm.try_solving_plan()
     print(pm.plan_info.plan_results.status)
 
+def run_modifier():
+    problem = ProblemCreator.create_problem(
+        [
+            ("x", True),
+            ("y", True),
+            ("z", True),
+            ("u", False),
+            ("v", False),
+            ("w", False),
+            ("q", False),
+            ("p", False),
+            ("d", False)
+        ],
+        [
+            ("a1", ["x", "y"], [("z", True), ("q", True)]),
+            ("a2", ["z"], [("u", True), ("p", True)]),
+            ("a3", ["x", "y", "z", "u"], [("z", False), ("v", True), ("w", True)]),
+            ("a4", [], [("z", False)]),
+            ("a5", ["x", "y"], [("z", False)])
+         ],
+        ["p", "q", "v", "w"]
+    )
+    pm = ExpModifier(problem)
+
+def run_next():
+    mylist = iter([1,2,3])
+    x = next(mylist)
+    print(x)
+    x = next(mylist)
+    print(x)
+    x = next(mylist)
+    print(x)
+
 
 if __name__ == '__main__':
     # readInWithActionCost()
     # instantiatePlanModifier()
     # permutationTest()
-    # basic_example()
-    basic_unsolvable()
+    #basic_example()
+    #basic_unsolvable()
+    run_modifier()
+    #run_next()

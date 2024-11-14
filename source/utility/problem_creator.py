@@ -15,6 +15,7 @@ class ProblemCreator:
     EFFECT_IS_UNKNOWN_ERROR_MESSAGE = "unknown effect. effect Variables must be in variable list."
     COST_UNKNOWN_ACTION_ERROR_MESSAGE = "cost for unknown action specified."
     GOAL_UNKNOWN_ERROR_MESSAGE = "unknown goal variable. goal variables must be in variable list."
+    EMPTY_EFFECT_LIST_MESSAGE = "effect list should not be empty."
 
     def __init__(
             self,
@@ -76,6 +77,11 @@ class ProblemCreator:
                             + " name: " + precondition_name)
                 precondition_fluent = name_to_fluent[precondition_name]
                 new_action.add_precondition(precondition_fluent)
+
+            #at least one effect need to be specified
+            if len(effect_list) == 0:
+                raise ValueError(
+                    ProblemCreator.EMPTY_EFFECT_LIST_MESSAGE + " action name: " + action_name)
 
             # add effects
             for effect_name, effect_result in effect_list:

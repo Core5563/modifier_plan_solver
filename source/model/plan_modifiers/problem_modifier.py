@@ -4,13 +4,14 @@ from typing import Callable
 from unified_planning.model import Problem #type: ignore
 from unified_planning.shortcuts import OneshotPlanner, OptimalityGuarantee, InstantaneousAction, Fluent #type: ignore
 from unified_planning.engines.results import CompilerResult, PlanGenerationResult, PlanGenerationResultStatus #type: ignore
-from .modifier_util import read_problem_from_file, ground_problem, calculate_total_action_cost_metric, cost_leaving_precondition #type: ignore
-from .modified_plan import ModifiedProblemInfo, ModifiedPlanInformation
+from source.model.plan_modifiers.modifier_util import (
+    read_problem_from_file, ground_problem, calculate_total_action_cost_metric, cost_leaving_precondition)
+from source.model.plan_modifiers.modified_plan import ModifiedProblemInfo, ModifiedPlanInformation
 
 
 class ProblemModifier(ABC):
     """abstract base class for modification of a Problem"""
-    def __init__(self, problem: Problem, calc_leave_precon: Callable[Problem, int] = cost_leaving_precondition):
+    def __init__(self, problem: Problem, calc_leave_precon: Callable[[Problem], int] = cost_leaving_precondition):
         #remember original problem
         self.original_problem: Problem = problem
         #ground the problem
@@ -43,9 +44,11 @@ class ProblemModifier(ABC):
             optimality_guarantee=OptimalityGuarantee.SOLVED_OPTIMALLY)
         plan_results: PlanGenerationResult = planer.solve(self.modified_problem_info.problem)
 
-        #create backtrack to plan if solvable
         backtracked_grounded_plan_with_left_preconditions: list[InstantaneousAction] = []
-        left_preconditions: dict[str, tuple[InstantaneousAction, list[Fluent]]] = dict[str, tuple[InstantaneousAction, list[Fluent]]]()
+        left_preconditions: dict[str, tuple[InstantaneousAction, list[Fluent]]] = (
+            dict[str, tuple[InstantaneousAction, list[Fluent]]]())
+
+        #create backtrack to plan if solvable
         if plan_results.status == PlanGenerationResultStatus.SOLVED_OPTIMALLY:
             for action_instance in plan_results.plan.actions:
                 if action_instance.action.name in self.modified_problem_info.action_to_left_precondition_mapping:

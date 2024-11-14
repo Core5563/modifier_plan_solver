@@ -1,5 +1,5 @@
 from source.utility.problem_creator import ProblemCreator
-from unified_planning.shortcuts import Problem
+from unified_planning.shortcuts import Problem #type:ignore
 
 
 class TestProblemCreator:
