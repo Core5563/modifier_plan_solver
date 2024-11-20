@@ -214,12 +214,12 @@ def lin_action_in_problem(original_action: InstantaneousAction, problem_to_asses
 
     #check if all actions that should be created are there
     for precondition in current_exit_action.preconditions:
-        assert lin_take_precon_action(precondition.fluent().name, problem_to_asses)
+        assert lin_take_precon_action_in_problem(precondition.fluent().name, problem_to_asses)
         found_leave_precon, connection_precon_name = lin_leave_precon_action(
             precondition.fluent().name, problem_to_asses)
         assert found_leave_precon
         assert lin_one_time_leave_precon_action(connection_precon_name, problem_to_asses)
-    return False
+    return True
 
 
 def lin_exit_action_in_problem(
@@ -233,9 +233,8 @@ def lin_exit_action_in_problem(
     return (False, InstantaneousAction(""))
 
 
-def lin_take_precon_action(precon_name: str, problem_to_asses: Problem) -> bool:
+def lin_take_precon_action_in_problem(precon_name: str, problem_to_asses: Problem) -> bool:
     """find the action to the precondition"""
-
 
     #find action
     for action in problem_to_asses.actions:
@@ -248,7 +247,7 @@ def lin_take_precon_action(precon_name: str, problem_to_asses: Problem) -> bool:
         #see if action is correct
         if LinModifier.TAKE_PRECON_ACTION_PREFIX in action.name:
             for effect in current_action.effects:
-                if effect.fluent == precon_name and effect.value.bool_constant_value():
+                if str(effect.fluent) == precon_name and effect.value.bool_constant_value():
                     return True
 
     return False
@@ -267,7 +266,7 @@ def lin_leave_precon_action(precon_name: str, problem_to_asses: Problem) -> tupl
         #see if action is correct
         if LinModifier.LEAVE_PRECON_ACTION_PREFIX in action.name:
             for effect in current_action.effects:
-                if effect.fluent == precon_name and effect.value.bool_constant_value():
+                if str(effect.fluent) == precon_name and effect.value.bool_constant_value():
                     precon_name = current_action.preconditions[0].fluent().name
                     return (True, precon_name)
 
@@ -288,7 +287,7 @@ def lin_one_time_leave_precon_action(precon_name: str, problem_to_asses: Problem
         #see if action is correct
         if LinModifier.LEAVE_ONE_TIME_PRECON_ACTION_PREFIX in action.name:
             for effect in current_action.effects:
-                if effect.fluent == precon_name and effect.value.bool_constant_value():
+                if str(effect.fluent) == precon_name and effect.value.bool_constant_value():
                     return True
 
     return False
@@ -299,3 +298,4 @@ def lin_actions_in_modifier_correct(modifier: LinModifier) -> bool:
 
     for action in grounded_problem.actions:
         assert lin_action_in_problem(action, modifier.modified_problem_info.problem)
+    return True

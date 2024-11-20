@@ -1,7 +1,7 @@
 """test problem creator"""
 import pytest
 from test.utility.assert_utility import precondition_in_action, effect_in_action
-from unified_planning.shortcuts import MinimizeActionCosts, InstantaneousAction
+from unified_planning.shortcuts import MinimizeActionCosts, InstantaneousAction #type: ignore
 from source.utility.problem_creator import ProblemCreator
 
 

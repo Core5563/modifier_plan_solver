@@ -1,5 +1,5 @@
 """import for unittest"""
-from unified_planning.shortcuts import Problem
+from unified_planning.shortcuts import Problem #type: ignore
 from source.model.plan_modifiers.modifier_util import read_problem_from_file, calculate_total_action_cost_metric, cost_leaving_precondition
 from source.utility.problem_creator import ProblemCreator
 
