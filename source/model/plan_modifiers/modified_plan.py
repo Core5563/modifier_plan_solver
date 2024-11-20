@@ -31,14 +31,15 @@ class ModifiedPlanInformation():
         #list starting from first Action determining which action is actually used
         self.backtracked_grounded_plan_result: list[InstantaneousAction] = backtracked_grounded_plan_result
 
+
     def plan_to_str(self) -> str:
         """print plan """
         print_str: str = ""
         for action_name in self.backtracked_grounded_plan_result:
             print_str += action_name+ "\n"
             left_precons: list[Fluent] = (
-                self.left_preconditions[action_name] 
-                if (action_name in self.left_preconditions) 
+                self.left_preconditions[action_name]
+                if (action_name in self.left_preconditions)
                 else []) #type: ignore
             for precon in left_precons:
                 print_str += " - " + str(precon) + "\n"
