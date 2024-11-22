@@ -1,7 +1,9 @@
-from source.model.plan_modifiers.modified_plan import ModifiedPlanInformation, ModifiedProblemInfo
+"""an Plan validator"""
 from unified_planning.shortcuts import Problem, InstantaneousAction, Fluent, PlanValidator
 from unified_planning.plans import ActionInstance, SequentialPlan
 from unified_planning.engines import ValidationResult
+from source.model.plan_modifiers.modified_plan import ModifiedPlanInformation, ModifiedProblemInfo
+
 
 class ModifiedPlanValidator:
     """Component to validate if modified Problem is actually solved by the plan"""
@@ -11,7 +13,7 @@ class ModifiedPlanValidator:
         verification_problem = grounded_problem.clone()
 
         left_precon_mapping: dict[str, tuple[InstantaneousAction, list[Fluent]]] = modified_problem.action_to_left_precondition_mapping
-        for action, list_of_left_precon_fluents in left_precon_mapping.values:
+        for _ , (action, list_of_left_precon_fluents) in left_precon_mapping.items():
             current_action: InstantaneousAction = action
 
             #get corresponding action in verify problem
@@ -38,10 +40,11 @@ class ModifiedPlanValidator:
 
         self.verification_problem = verification_problem
         self.to_verify_plan = to_verify_plan
+        self.validation_result: ValidationResult | None = None
 
     def verify_plan(self) -> ValidationResult:
         """verify the modified Problem"""
         validator = PlanValidator(problem_kind=self.verification_problem.kind, plan_kind=self.to_verify_plan.kind)
         validation_result: ValidationResult = validator.validate(self.verification_problem, self.to_verify_plan)
-        
+        self.validation_result = validation_result
         return validation_result

@@ -2,12 +2,13 @@
 from uuid import uuid4
 from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Fluent, BoolType #type: ignore
 from .problem_modifier import ProblemModifier
-from .modified_plan import ModifiedProblemInfo
+from source.model.plan_modifiers.modified_plan import ModifiedProblemInfo
 
 class ExpModifier(ProblemModifier):
     """Plan Modifier actions are permuted according to its preconditions"""
     #def __init__(self, problem: Problem):
     #    PlanModifier.__init__(self, problem)
+
     def _transform_grounded_plan(self) -> ModifiedProblemInfo:
         #clone the problem
         problem: Problem = self.grounded_information.problem
@@ -15,7 +16,7 @@ class ExpModifier(ProblemModifier):
 
         #altered problem is saturated with new actions
         modified_problem.clear_actions()
-
+        
         #quality metric is created new
         modified_problem.clear_quality_metrics()
         modified_problem_cost_mapping = dict[Action, int]()
@@ -68,6 +69,7 @@ class ExpModifier(ProblemModifier):
         modified_problem.add_quality_metric(
             MinimizeActionCosts(modified_problem_cost_mapping, default = 1))
 
+
         #return modified problem
         return ModifiedProblemInfo(
             modified_problem,
@@ -86,6 +88,7 @@ def permutation_info(permutation: list[bool]) -> tuple[int, int]:
     left_out_preconditions = len(permutation) - used_preconditions
     return (used_preconditions, left_out_preconditions)
 
+
 def increase_permutation(permutation: list[bool]) -> None:
     """like adding 1 to a number increase change the permutation """
     index: int = 0
@@ -97,6 +100,7 @@ def increase_permutation(permutation: list[bool]) -> None:
         else:
             permutation[index] = True
             break
+
 
 def create_actions_according_to_permutation(
         permutation: list[bool],

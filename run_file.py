@@ -101,7 +101,7 @@ def basic_example():
 
 def basic_unsolvable():
     problem = ProblemCreator.create_problem(
-        [("x", True), ("y", False), ("z", False), ("p", False), ("q", False), "wrong"],
+        [("x", True), ("y", False), ("z", False), ("p", False), ("q", False)],
         [
             ("a1", ["x", "y"], [("z", True), ("p", True), ("q", False)]),
             ("a2", ["z"], [("q", True), ("p", False)])
@@ -111,6 +111,32 @@ def basic_unsolvable():
     pm = ExpModifier(problem)
     pm.try_solving_plan()
     print(pm.plan_info.plan_results.status)
+
+def basic_unsolvable_solvable():
+    problem = ProblemCreator.create_problem(
+        [
+            ("x", True),
+            ("y", False),
+            ("z", False),
+            ("p", False),
+            ("q", False)
+        ],
+        [
+            ("a1", ["x", "y"], [("z", True), ("p", True)]),
+            ("a2", ["z"], [("q", True)])
+        ],
+        ["p", "q"]
+    )
+    pm = LinModifier(problem)
+    pm.try_solving_plan()
+    print("original problem")
+    print(pm.original_problem)
+    #print(pm.modified_problem_info.problem)
+    print("grounded information")
+    print(pm.grounded_information)
+    print("")
+    print(pm.plan_info.plan_results.status)
+
 
 def run_modifier():
     problem = ProblemCreator.create_problem(
@@ -152,5 +178,6 @@ if __name__ == '__main__':
     # permutationTest()
     #basic_example()
     #basic_unsolvable()
-    run_modifier()
+    #run_modifier()
     #run_next()
+    basic_unsolvable_solvable()

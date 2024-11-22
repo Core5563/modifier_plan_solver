@@ -7,6 +7,7 @@ from unified_planning.engines.results import CompilerResult, PlanGenerationResul
 from source.model.plan_modifiers.modifier_util import (
     read_problem_from_file, ground_problem, calculate_total_action_cost_metric, cost_leaving_precondition)
 from source.model.plan_modifiers.modified_plan import ModifiedProblemInfo, ModifiedPlanInformation
+from source.model.plan_modifiers.modified_plan_validator import ModifiedPlanValidator
 
 
 class ProblemModifier(ABC):
@@ -24,6 +25,8 @@ class ProblemModifier(ABC):
         self.modified_problem_info: ModifiedProblemInfo = self._transform_grounded_plan()
         #create object for plan solving
         self.plan_info: ModifiedPlanInformation | None = None
+        #create object for plan verification
+        self.plan_validator: ModifiedPlanValidator | None = None
 
     @classmethod
     def from_file(cls, domain_filepath: str, problem_filepath: str):
@@ -59,20 +62,4 @@ class ProblemModifier(ABC):
                     backtracked_grounded_plan_with_left_preconditions.append(self.modified_problem_info.modified_grounded_actions_mapping[action_instance.action.name])
         self.plan_info = ModifiedPlanInformation(plan_results, left_preconditions, backtracked_grounded_plan_with_left_preconditions)
 
-def action_name_in_dict(
-    searched_action: InstantaneousAction, dictionary: dict[InstantaneousAction, InstantaneousAction]) -> bool:
-    """determines if action name is in dictionary"""
-    for action_in_dict, _ in dictionary.items():
-        if searched_action.name == action_in_dict.name:
-            return True
-    return False
-
-
-def return_action_by_name(
-        name: str,
-        dictionary: dict[InstantaneousAction, InstantaneousAction]) -> InstantaneousAction:
-    "returns the mapped action by the name of the given action"
-    for action_in_dict, mapped_action in dictionary.items():
-        if name == action_in_dict.name:
-            return mapped_action
-    raise ValueError("Key not Found")
+        #self.plan_validator = ModifiedPlanValidator(self.plan_info, self.grounded_information.problem, self.modified_problem_info)

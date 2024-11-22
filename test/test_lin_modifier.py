@@ -29,5 +29,4 @@ def test_lin_modifier_actions() -> None:
         ["p", "q", "v", "w"]
     )
     pm = LinModifier(problem)
-    #print(pm.modified_problem_info.problem)
     assert lin_actions_in_modifier_correct(pm)
