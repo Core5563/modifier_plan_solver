@@ -17,9 +17,11 @@ def ground_problem(problem: Problem) -> CompilerResult:
     reduce the problem to basic STRIPS and retain information to map back the actions to 
     the original problem
     """
-    compiler: Compiler = Compiler(
-        problem_kind=problem.kind,
-        compilation_kind=CompilationKind.GROUNDING)
+    #compiler: Compiler = Compiler(
+    #    problem_kind=problem.kind,
+    #    compilation_kind=CompilationKind.GROUNDING)
+    compiler: Compiler = Compiler(name="pyperplan")#, params={"remove_statics_from_initial_state=True": 'False', 'remove_irrelevant_operators': "False"})
+
     compiler_result: CompilerResult = compiler.compile(
         problem,
         compilation_kind=CompilationKind.GROUNDING)

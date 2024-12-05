@@ -1,6 +1,7 @@
 from source.model.plan_modifiers.modifier_util import read_problem_from_file, ground_problem, \
     calculate_total_action_cost_metric
 from source.utility.problem_creator import ProblemCreator
+from unified_planning.shortcuts import Problem, Fluent, InstantaneousAction, BoolType
 import unified_planning.shortcuts  # type: ignore
 # import unified_planning.shortcuts as us
 from unified_planning.engines.results import CompilerResult  # type: ignore
@@ -113,20 +114,49 @@ def basic_unsolvable():
     print(pm.plan_info.plan_results.status)
 
 def basic_unsolvable_solvable():
-    problem = ProblemCreator.create_problem(
-        [
-            ("x", True),
-            ("y", False),
-            ("z", False),
-            ("p", False),
-            ("q", False)
-        ],
-        [
-            ("a1", ["x", "y"], [("z", True), ("p", True)]),
-            ("a2", ["z"], [("q", True)])
-        ],
-        ["p", "q"]
-    )
+    #problem = ProblemCreator.create_problem(
+    #    [
+    #        ("x", True),
+    #        ("y", False),
+    #        ("z", False),
+    #        ("p", False),
+    #        ("q", False)
+    #    ],
+    #    [
+    #        ("a1", ["x", "y"], [("z", True), ("p", True)]),
+    #        ("a2", ["z"], [("q", True)])
+    #    ],
+    #    ["p", "q"]
+    #)
+    problem = Problem()
+    #variables
+    x = Fluent("x", BoolType())
+    y = Fluent("y", BoolType())
+    z = Fluent("z", BoolType())
+    p = Fluent("p", BoolType())
+    q = Fluent("q", BoolType())
+    #add variables and set initial values
+    problem.add_fluent(x, default_initial_value=True)
+    problem.add_fluent(y, default_initial_value=False)
+    problem.add_fluent(z, default_initial_value=False)
+    problem.add_fluent(p, default_initial_value=False)
+    problem.add_fluent(q, default_initial_value=False)
+    #add goals
+    problem.add_goal(p)
+    problem.add_goal(q)
+    #actions
+    a1 = InstantaneousAction("a1")
+    a1.add_precondition(x)
+    a1.add_precondition(y)
+    a1.add_effect(z, True)
+    a1.add_effect(p, True)
+    problem.add_action(a1)
+    a2 = InstantaneousAction("a2")
+    a2.add_precondition(z)
+    a2.add_effect(q, True)
+    problem.add_action(a2)
+
+
     pm = LinModifier(problem)
     pm.try_solving_plan()
     print("original problem")
