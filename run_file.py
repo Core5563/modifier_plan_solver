@@ -1,12 +1,14 @@
 from source.model.plan_modifiers.modifier_util import read_problem_from_file, ground_problem, \
     calculate_total_action_cost_metric
 from source.utility.problem_creator import ProblemCreator
-from unified_planning.shortcuts import Problem, Fluent, InstantaneousAction, BoolType
+from unified_planning.shortcuts import Problem, Fluent, InstantaneousAction, BoolType, Compiler, CompilationKind
 import unified_planning.shortcuts  # type: ignore
 # import unified_planning.shortcuts as us
 from unified_planning.engines.results import CompilerResult  # type: ignore
 from source.model.plan_modifiers.exp_modifier import ExpModifier, permutation_info
 from source.model.plan_modifiers.lin_modifier import LinModifier
+from unified_planning.shortcuts import *
+from unified_planning.io import PDDLWriter, PDDLReader
 
 
 def runReadInFromFile():
@@ -202,6 +204,52 @@ def run_next():
     print(x)
 
 
+def write_problem_read_problem_test():
+    Location = UserType('Location')
+
+    robot_at = unified_planning.model.Fluent('robot_at', BoolType(), l=Location)
+    connected = unified_planning.model.Fluent('connected', BoolType(), l_from=Location, l_to=Location)
+
+    move = InstantaneousAction('move', l_from=Location, l_to=Location)
+    l_from = move.parameter('l_from')
+    l_to = move.parameter('l_to')
+    move.add_precondition(connected(l_from, l_to))
+    move.add_precondition(robot_at(l_from))
+    move.add_effect(robot_at(l_from), False)
+    move.add_effect(robot_at(l_to), True)
+
+    problem = Problem('robot')
+    problem.add_fluent(robot_at, default_initial_value=False)
+    problem.add_fluent(connected, default_initial_value=False)
+    problem.add_action(move)
+
+    NLOC = 10
+    locations = [Object('l%s' % i, Location) for i in range(NLOC)]
+    problem.add_objects(locations)
+
+    problem.add_goal(robot_at(locations[-1]))
+
+
+    compiler: Compiler = Compiler(problem_kind=problem.kind, compilation_kind=CompilationKind.GROUNDING)#, params={"remove_statics_from_initial_state=True": 'False', 'remove_irrelevant_operators': "False"})
+
+    compiler_result: CompilerResult = compiler.compile(
+        problem,
+        compilation_kind=CompilationKind.GROUNDING)
+    
+    grounded_problem = compiler_result.problem
+    print("grounded")
+    print(grounded_problem)
+
+    writer = PDDLWriter(grounded_problem)
+    writer.write_domain("domain_test_file.pddl")
+    writer.write_problem("problem_test_file.pddl")
+
+    reader = PDDLReader()
+    expected_problem = reader.parse_problem(domain_filename="domain_test_file.pddl",problem_filename="problem_test_file.pddl")
+    print("expected")
+    print(expected_problem)
+
+
 if __name__ == '__main__':
     # readInWithActionCost()
     # instantiatePlanModifier()
@@ -209,5 +257,6 @@ if __name__ == '__main__':
     #basic_example()
     #basic_unsolvable()
     #run_modifier()
-    #run_next()
-    basic_unsolvable_solvable()
+    run_next()
+    #basic_unsolvable_solvable()
+    #write_problem_read_problem_test()
