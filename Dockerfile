@@ -3,8 +3,8 @@ WORKDIR /usr/local/app
 
 # Install the application dependencies
 COPY requirements.txt ./
-RUN python -m venv .venv
-RUN source .venv/bin/activate
+#RUN python -m venv .venv
+#RUN source .venv/bin/activate
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy in the source code
