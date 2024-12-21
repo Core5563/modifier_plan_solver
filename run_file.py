@@ -9,6 +9,7 @@ from source.model.plan_modifiers.exp_modifier import ExpModifier, permutation_in
 from source.model.plan_modifiers.lin_modifier import LinModifier
 from unified_planning.shortcuts import *
 from unified_planning.io import PDDLWriter, PDDLReader
+from source.utility.directory_scanner import DirectoryScanner
 
 
 def runReadInFromFile():
@@ -250,6 +251,47 @@ def write_problem_read_problem_test():
     print(expected_problem)
 
 
+def some_unsolvable_example_with_basic_code():
+    problem = Problem()
+    #variables
+    x = Fluent("x", BoolType())
+    y = Fluent("y", BoolType())
+    z = Fluent("z", BoolType())
+    p = Fluent("p", BoolType())
+    q = Fluent("q", BoolType())
+    #add variables and set initial values
+    problem.add_fluent(x, default_initial_value=True)
+    problem.add_fluent(y, default_initial_value=False)
+    problem.add_fluent(z, default_initial_value=False)
+    problem.add_fluent(p, default_initial_value=False)
+    problem.add_fluent(q, default_initial_value=False)
+    #add goals
+    problem.add_goal(p)
+    problem.add_goal(q)
+    #actions
+    a1 = InstantaneousAction("a1")
+    a1.add_precondition(x)
+    a1.add_precondition(y)
+    a1.add_effect(z, True)
+    a1.add_effect(p, True)
+    problem.add_action(a1)
+    a2 = InstantaneousAction("a2")
+    a2.add_precondition(z)
+    a2.add_effect(q, True)
+    problem.add_action(a2)
+
+    #ground problem
+    compiler = Compiler(name ="pyperplan")
+
+    compiler_result = compiler.compile(problem, compilation_kind = CompilationKind.GROUNDING)
+
+    print(compiler_result.problem)
+
+def run_directory_scan():
+    dir_scanner = DirectoryScanner()
+    dir_scanner.scan_benchmark('./evaluation')
+
+
 if __name__ == '__main__':
     # readInWithActionCost()
     # instantiatePlanModifier()
@@ -257,6 +299,7 @@ if __name__ == '__main__':
     #basic_example()
     #basic_unsolvable()
     #run_modifier()
-    run_next()
+    #run_next()
     #basic_unsolvable_solvable()
     #write_problem_read_problem_test()
+    run_directory_scan()
