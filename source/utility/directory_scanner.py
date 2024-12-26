@@ -1,6 +1,12 @@
 """module for getting back files"""
 import os
 
+class ProblemDomainSet:
+    """set for problem and directory"""
+    def __init__(self, domain_dir: str, problem_dir: str):
+        self.domain_dir = domain_dir
+        self.problem_dir = problem_dir
+
 class DirectoryScanner:
     """scan files in directory and subdirectories"""
     def __init__(self):
@@ -23,9 +29,3 @@ class DirectoryScanner:
                     domain_dir + os.sep + "domain.pddl",
                     problem_dir + os.sep + "problem.pddl"))
         return content_list
-
-class ProblemDomainSet:
-    """set for problem and directory"""
-    def __init__(self, domain_dir: str, problem_dir: str):
-        self.domain_dir = domain_dir
-        self.problem_dir = problem_dir

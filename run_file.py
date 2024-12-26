@@ -4,12 +4,15 @@ from source.utility.problem_creator import ProblemCreator
 from unified_planning.shortcuts import Problem, Fluent, InstantaneousAction, BoolType, Compiler, CompilationKind
 import unified_planning.shortcuts  # type: ignore
 # import unified_planning.shortcuts as us
+import sqlite3
+import os
 from unified_planning.engines.results import CompilerResult  # type: ignore
 from source.model.plan_modifiers.exp_modifier import ExpModifier, permutation_info
 from source.model.plan_modifiers.lin_modifier import LinModifier
 from unified_planning.shortcuts import *
 from unified_planning.io import PDDLWriter, PDDLReader
 from source.utility.directory_scanner import DirectoryScanner
+
 
 
 def runReadInFromFile():
@@ -291,6 +294,21 @@ def run_directory_scan():
     dir_scanner = DirectoryScanner()
     dir_scanner.scan_benchmark('./evaluation')
 
+def run_db_stuff():
+    #remove file first
+    try:
+        os.remove('evaluation/database/eval.db')
+    except FileNotFoundError:
+        #ignore if file does not exist
+        pass
+
+    con = sqlite3.connect('evaluation/database/eval.db')
+    curs = con.cursor()
+    scriptdata: str= ""
+    with open("evaluation/database/setup.sql", mode="r", encoding="utf-8") as file:
+        scriptdata = file.read().rstrip()
+    curs.executescript(scriptdata)
+
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -302,4 +320,5 @@ if __name__ == '__main__':
     #run_next()
     #basic_unsolvable_solvable()
     #write_problem_read_problem_test()
-    run_directory_scan()
+    #run_directory_scan()
+    run_db_stuff()

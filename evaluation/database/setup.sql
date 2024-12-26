@@ -5,14 +5,15 @@ CREATE TABLE destroyed_problems (
 );
 
 CREATE TABLE added_preconditions (
-    FOREIGN KEY (destroyedProblemID) REFERENCES destroyed_problems(destroyedProblemID),
+    destroyedProblemID INT NOT NULL,
     actionName TEXT NOT NULL,
     fluentName TEXT NOT NULL,
-    PRIMARY KEY (destroyedProblemID, action_name, fluent_name)
+    FOREIGN KEY (destroyedProblemID) REFERENCES destroyed_problems(destroyedProblemID),
+    PRIMARY KEY (destroyedProblemID, actionName, fluentName)
 );
 
 create TABLE modifiers(
-    modifierVersionID INT PRIMARY KEY NOT NULL,
+    modifierVersionID INT NOT NULL PRIMARY KEY,
     modifierName TEXT NOT NULL
 );
 
@@ -23,14 +24,17 @@ VALUES
 
 CREATE TABLE results (
     resultID INT PRIMARY KEY NOT NULL,
+    destroyedProblemID INT NOT NULL,
+    modifierVersionID INT NOT NULL,
+    timeInMilliseconds INT NOT NULL,
     FOREIGN KEY (destroyedProblemID) REFERENCES destroyed_problems(destroyedProblemID),
-    FOREIGN KEY (modifierVersionID) REFERENCES modifiers(modifierVersionID),
-    timeInMilliseconds INT NOT NULL
+    FOREIGN KEY (modifierVersionID) REFERENCES modifiers(modifierVersionID)
 );
 
 CREATE TABLE left_preconditions_results(
-    FOREIGN KEY (resultID) REFERENCES results(resultID),
+    resultID INT NOT NULL,
     actionName TEXT NOT NULL,
     fluentName TEXT NOT NULL,
+    FOREIGN KEY (resultID) REFERENCES results(resultID),
     PRIMARY KEY (resultID, actionName, fluentName)
 )
