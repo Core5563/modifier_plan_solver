@@ -12,6 +12,7 @@ from source.model.plan_modifiers.lin_modifier import LinModifier
 from unified_planning.shortcuts import *
 from unified_planning.io import PDDLWriter, PDDLReader
 from source.utility.directory_scanner import DirectoryScanner
+from source.utility.db_handler import DBHandler
 
 
 
@@ -309,6 +310,11 @@ def run_db_stuff():
         scriptdata = file.read().rstrip()
     curs.executescript(scriptdata)
 
+def run_db_handler():
+    dbh = DBHandler()
+    dbh.insert_destroy_problems("dm","pm","og_dm","og_pm")
+    print(dbh.get_all_destroyed_problems())
+    print(dbh.find_corresponding_destroyed_problem_id("dm","pm","og_dm","og_pm"))
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -321,4 +327,5 @@ if __name__ == '__main__':
     #basic_unsolvable_solvable()
     #write_problem_read_problem_test()
     #run_directory_scan()
-    run_db_stuff()
+    #run_db_stuff()
+    run_db_handler()

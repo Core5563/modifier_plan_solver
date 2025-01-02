@@ -1,11 +1,13 @@
 CREATE TABLE destroyed_problems (
-    destroyedProblemID INT PRIMARY KEY NOT NULL ,
+    destroyedProblemID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     domainFilePath TEXT NOT NULL,
-    problemFilePath TEXT NOT NULL
+    problemFilePath TEXT NOT NULL,
+    originalDomainFilePath TEXT NOT NULL,
+    originalProblemFilePath TEXT NOT NULL
 );
 
 CREATE TABLE added_preconditions (
-    destroyedProblemID INT NOT NULL,
+    destroyedProblemID INTEGER NOT NULL,
     actionName TEXT NOT NULL,
     fluentName TEXT NOT NULL,
     FOREIGN KEY (destroyedProblemID) REFERENCES destroyed_problems(destroyedProblemID),
@@ -13,7 +15,7 @@ CREATE TABLE added_preconditions (
 );
 
 create TABLE modifiers(
-    modifierVersionID INT NOT NULL PRIMARY KEY,
+    modifierVersionID INTEGER NOT NULL PRIMARY KEY,
     modifierName TEXT NOT NULL
 );
 
@@ -23,16 +25,16 @@ VALUES
 (2, "LinModifier");
 
 CREATE TABLE results (
-    resultID INT PRIMARY KEY NOT NULL,
-    destroyedProblemID INT NOT NULL,
-    modifierVersionID INT NOT NULL,
-    timeInMilliseconds INT NOT NULL,
+    resultID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+    destroyedProblemID INTEGER NOT NULL,
+    modifierVersionID INTEGER NOT NULL,
+    timeInMilliseconds INTEGER NOT NULL,
     FOREIGN KEY (destroyedProblemID) REFERENCES destroyed_problems(destroyedProblemID),
     FOREIGN KEY (modifierVersionID) REFERENCES modifiers(modifierVersionID)
 );
 
 CREATE TABLE left_preconditions_results(
-    resultID INT NOT NULL,
+    resultID INTEGER NOT NULL,
     actionName TEXT NOT NULL,
     fluentName TEXT NOT NULL,
     FOREIGN KEY (resultID) REFERENCES results(resultID),
