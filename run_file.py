@@ -314,7 +314,16 @@ def run_db_handler():
     dbh = DBHandler()
     dbh.insert_destroy_problems("dm","pm","og_dm","og_pm")
     print(dbh.get_all_destroyed_problems())
-    print(dbh.find_corresponding_destroyed_problem_id("dm","pm","og_dm","og_pm"))
+    needed_id = dbh.find_corresponding_destroyed_problem_id("dm","pm","og_dm","og_pm")
+    dbh.insert_into_results(needed_id, 4, 42)
+    print(dbh.get_all_from_results())
+
+    dbh.insert_into_added_preconditions(needed_id, "someaction", "somefluent")
+    print(dbh.get_all_add_preconditions())
+    result_id = dbh.find_corresponding_result_id(needed_id, 4, 42)
+    dbh.insert_into_left_preconditions_results(result_id, "another_action", "another_fluent")
+    print(dbh.get_all_left_preconditions_results())
+
 
 if __name__ == '__main__':
     # readInWithActionCost()
