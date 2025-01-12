@@ -25,21 +25,22 @@ class DBHandler:
             #ignore if file does not exist
             pass
 
-    def get_all_destroyed_problems(self) -> list[tuple[int, str, str, str, str]]:
+    def get_all_destroyed_problems(self) -> list[tuple[int, str, str, str, str, int]]:
         """return all saved problem types"""
         res = self.curs.execute("SELECT * FROM destroyed_problems")
         return res.fetchall()
 
     def insert_destroy_problems(self, problem_filepath: str, domain_filepath: str,
-            original_problem_filepath: str, original_domain_filepath: str)-> None:
+            original_problem_filepath: str, original_domain_filepath: str, plan_solvable_cost: int)-> None:
         """insert into the destroyed problems table"""
         self.curs.execute(
-            "INSERT INTO destroyed_problems(domainFilePath, problemFilePath, originalDomainFilePath, originalProblemFilePath) VALUES " +
+            "INSERT INTO destroyed_problems(domainFilePath, problemFilePath, originalDomainFilePath, originalProblemFilePath, planSolvableCost) VALUES " +
             "(" +
             "\"" + domain_filepath + "\"," +
             "\"" + problem_filepath + "\"," +
             "\"" + original_domain_filepath + "\"," +
-            "\"" + original_problem_filepath + "\"" +
+            "\"" + original_problem_filepath + "\"," +
+            str(plan_solvable_cost) +
             ")"
         )
 
@@ -106,7 +107,7 @@ class DBHandler:
             ")"
         )
 
-    def get_all_left_preconditions_results(self) -> list[int, str, str]:
+    def get_all_left_preconditions_results(self) -> list[tuple[int, str, str]]:
         """get everything from the left_preconditions_results table"""
         res = self.curs.execute("SELECT * FROM left_preconditions_results")
         return res.fetchall()

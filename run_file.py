@@ -1,7 +1,7 @@
 from source.model.plan_modifiers.modifier_util import read_problem_from_file, ground_problem, \
     calculate_total_action_cost_metric
 from source.utility.problem_creator import ProblemCreator
-from unified_planning.shortcuts import Problem, Fluent, InstantaneousAction, BoolType, Compiler, CompilationKind
+from unified_planning.shortcuts import Problem, Fluent, InstantaneousAction, BoolType, Compiler, CompilationKind #type: ignore
 import unified_planning.shortcuts  # type: ignore
 # import unified_planning.shortcuts as us
 import sqlite3
@@ -10,7 +10,7 @@ from unified_planning.engines.results import CompilerResult  # type: ignore
 from source.model.plan_modifiers.exp_modifier import ExpModifier, permutation_info
 from source.model.plan_modifiers.lin_modifier import LinModifier
 from unified_planning.shortcuts import *
-from unified_planning.io import PDDLWriter, PDDLReader
+from unified_planning.io import PDDLWriter, PDDLReader #type: ignore
 from source.utility.directory_scanner import DirectoryScanner
 from source.utility.db_handler import DBHandler
 
@@ -285,7 +285,8 @@ def some_unsolvable_example_with_basic_code():
     problem.add_action(a2)
 
     #ground problem
-    compiler = Compiler(name ="pyperplan")
+    #compiler = Compiler(name ="pyperplan")
+    compiler = Compiler(name ="up_grounder", params={"prune_actions": False})
 
     compiler_result = compiler.compile(problem, compilation_kind = CompilationKind.GROUNDING)
 
@@ -312,7 +313,7 @@ def run_db_stuff():
 
 def run_db_handler():
     dbh = DBHandler()
-    dbh.insert_destroy_problems("dm","pm","og_dm","og_pm")
+    dbh.insert_destroy_problems("dm","pm","og_dm","og_pm", 1)
     print(dbh.get_all_destroyed_problems())
     needed_id = dbh.find_corresponding_destroyed_problem_id("dm","pm","og_dm","og_pm")
     dbh.insert_into_results(needed_id, 4, 42)
@@ -335,6 +336,7 @@ if __name__ == '__main__':
     #run_next()
     #basic_unsolvable_solvable()
     #write_problem_read_problem_test()
+    #some_unsolvable_example_with_basic_code()
     #run_directory_scan()
     #run_db_stuff()
     run_db_handler()

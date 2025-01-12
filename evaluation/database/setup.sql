@@ -3,7 +3,8 @@ CREATE TABLE destroyed_problems (
     domainFilePath TEXT NOT NULL,
     problemFilePath TEXT NOT NULL,
     originalDomainFilePath TEXT NOT NULL,
-    originalProblemFilePath TEXT NOT NULL
+    originalProblemFilePath TEXT NOT NULL,
+    planSolvableCost INT NOT NULL
 );
 
 CREATE TABLE added_preconditions (

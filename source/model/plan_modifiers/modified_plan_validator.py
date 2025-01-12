@@ -1,7 +1,7 @@
 """an Plan validator"""
-from unified_planning.shortcuts import Problem, InstantaneousAction, Fluent, PlanValidator
-from unified_planning.plans import ActionInstance, SequentialPlan
-from unified_planning.engines import ValidationResult
+from unified_planning.shortcuts import Problem, InstantaneousAction, Fluent, PlanValidator #type: ignore
+from unified_planning.plans import ActionInstance, SequentialPlan #type: ignore
+from unified_planning.engines import ValidationResult #type: ignore
 from source.model.plan_modifiers.modified_plan import ModifiedPlanInformation, ModifiedProblemInfo
 
 
