@@ -20,7 +20,7 @@ def ground_problem(problem: Problem) -> CompilerResult:
     #compiler: Compiler = Compiler(
     #    problem_kind=problem.kind,
     #    compilation_kind=CompilationKind.GROUNDING)
-    compiler: Compiler = Compiler(name="pyperplan")#, params={"remove_statics_from_initial_state=True": 'False', 'remove_irrelevant_operators': "False"})
+    compiler: Compiler = Compiler(name ="up_grounder", params={"prune_actions": False})#, params={"remove_statics_from_initial_state=True": 'False', 'remove_irrelevant_operators': "False"})
 
     compiler_result: CompilerResult = compiler.compile(
         problem,
