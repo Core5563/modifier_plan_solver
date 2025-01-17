@@ -1,10 +1,15 @@
-CREATE TABLE destroyed_problems (
-    destroyedProblemID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+CREATE TABLE original_problems (
+    originalProblemID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     domainFilePath TEXT NOT NULL,
     problemFilePath TEXT NOT NULL,
-    originalDomainFilePath TEXT NOT NULL,
-    originalProblemFilePath TEXT NOT NULL,
-    planSolvableCost INT NOT NULL
+    planSolvableCost INT NOT NULL,
+    timeInMilliseconds INT NOT NULL
+);
+
+CREATE TABLE destroyed_problems (
+    destroyedProblemID INTEGER PRIMARY KEY NOT NULL,
+    domainFilePath TEXT NOT NULL,
+    problemFilePath TEXT NOT NULL
 );
 
 CREATE TABLE added_preconditions (

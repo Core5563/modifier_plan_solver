@@ -25,33 +25,43 @@ class DBHandler:
             #ignore if file does not exist
             pass
 
-    def get_all_destroyed_problems(self) -> list[tuple[int, str, str, str, str, int]]:
+    def get_all_destroyed_problems(self) -> list[tuple[int, str, str]]:
         """return all saved problem types"""
         res = self.curs.execute("SELECT * FROM destroyed_problems")
         return res.fetchall()
 
-    def insert_destroy_problems(self, problem_filepath: str, domain_filepath: str,
-            original_problem_filepath: str, original_domain_filepath: str, plan_solvable_cost: int)-> None:
-        """insert into the destroyed problems table"""
+    def insert_into_original_problems(self, problem_filepath: str, domain_filepath: str, plan_solvable_cost: int, solve_time_milliseconds:int):
+        """insert into original problem"""
         self.curs.execute(
-            "INSERT INTO destroyed_problems(domainFilePath, problemFilePath, originalDomainFilePath, originalProblemFilePath, planSolvableCost) VALUES " +
+            "INSERT INTO original_problems(domainFilePath, problemFilePath, planSolvableCost, timeInMilliseconds) VALUES " +
             "(" +
             "\"" + domain_filepath + "\"," +
-            "\"" + problem_filepath + "\"," +
-            "\"" + original_domain_filepath + "\"," +
-            "\"" + original_problem_filepath + "\"," +
-            str(plan_solvable_cost) +
+            "\"" + problem_filepath + "\"," + 
+            str(plan_solvable_cost) + "," +
+            str(solve_time_milliseconds) +
             ")"
         )
 
-    def find_corresponding_destroyed_problem_id(self, problem_filepath: str, domain_filepath: str,
-            original_problem_filepath: str, original_domain_filepath: str)-> int:
+    def get_original_problem_from_id(self, problem_id: int) -> tuple[int, str, str, int , int]:
+        res = self.curs.execute("SELECT * FROM original_problems WHERE originalProblemID=" + str(problem_id))
+        return_tuple = res.fetchone()
+        return return_tuple
+
+    def insert_destroy_problems(self, problem_id:int,  problem_filepath: str, domain_filepath: str)-> None:
+        """insert into the destroyed problems table"""
+        self.curs.execute(
+            "INSERT INTO destroyed_problems(destroyedProblemID, domainFilePath, problemFilePath) VALUES " +
+            "(" + str(problem_id) + "," +
+            "\"" + domain_filepath + "\"," +
+            "\"" + problem_filepath + "\"" 
+            ")"
+        )
+
+    def find_corresponding_original_problem_id(self, problem_filepath: str, domain_filepath: str)-> int:
         """returns problem id of the given problem"""
-        res = self.curs.execute("SELECT destroyedProblemID FROM destroyed_problems WHERE " +
+        res = self.curs.execute("SELECT originalProblemID FROM original_problems WHERE " +
             "domainFilePath=\"" + domain_filepath +"\" " +
-            "AND problemFilePath=\"" + problem_filepath + "\" " +
-            "AND originalDomainFilePath=\"" + original_domain_filepath + "\" " +
-            "AND originalProblemFilePath=\"" + original_problem_filepath + "\""
+            "AND problemFilePath=\"" + problem_filepath + "\" "
         )
         problem_id = res.fetchone()[0]
         return problem_id

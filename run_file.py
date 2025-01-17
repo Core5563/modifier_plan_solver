@@ -6,6 +6,7 @@ import unified_planning.shortcuts  # type: ignore
 # import unified_planning.shortcuts as us
 import sqlite3
 import os
+import timeit
 from unified_planning.engines.results import CompilerResult  # type: ignore
 from source.model.plan_modifiers.exp_modifier import ExpModifier, permutation_info
 from source.model.plan_modifiers.lin_modifier import LinModifier
@@ -313,9 +314,12 @@ def run_db_stuff():
 
 def run_db_handler():
     dbh = DBHandler()
-    dbh.insert_destroy_problems("dm","pm","og_dm","og_pm", 1)
+    dbh.insert_into_original_problems("domain", "original", 1 , 2)
+
+    needed_id = dbh.find_corresponding_original_problem_id("domain", "original")
+    print(dbh.get_original_problem_from_id(needed_id))
+    dbh.insert_destroy_problems(needed_id ,"dm","pm")
     print(dbh.get_all_destroyed_problems())
-    needed_id = dbh.find_corresponding_destroyed_problem_id("dm","pm","og_dm","og_pm")
     dbh.insert_into_results(needed_id, 4, 42)
     print(dbh.get_all_from_results())
 
@@ -325,6 +329,11 @@ def run_db_handler():
     dbh.insert_into_left_preconditions_results(result_id, "another_action", "another_fluent")
     print(dbh.get_all_left_preconditions_results())
 
+
+def time_calc():
+    start = timeit.default_timer()
+    end = timeit.default_timer()
+    print((end - start) * 10 ** 9)
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -340,3 +349,4 @@ if __name__ == '__main__':
     #run_directory_scan()
     #run_db_stuff()
     run_db_handler()
+    #time_calc()
