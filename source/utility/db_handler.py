@@ -3,10 +3,11 @@ import sqlite3
 import os
 class DBHandler:
     """handling of saving information"""
-    def __init__(self):
+    def __init__(self, database_file_filepath: str):
         #remove file first
+        self.database_file_filepath: str = database_file_filepath
         self.remove_db_file()
-        self.con = sqlite3.connect('evaluation/database/eval.db')
+        self.con = sqlite3.connect(database_file_filepath)
         self.curs: sqlite3.Cursor = self.con.cursor()
         self.initialize_db()
 
@@ -20,7 +21,7 @@ class DBHandler:
     def remove_db_file(self) -> None:
         """remove db file"""
         try:
-            os.remove('evaluation/database/eval.db')
+            os.remove(self.database_file_filepath)
         except FileNotFoundError:
             #ignore if file does not exist
             pass
@@ -36,24 +37,27 @@ class DBHandler:
             "INSERT INTO original_problems(domainFilePath, problemFilePath, planSolvableCost, timeInMilliseconds) VALUES " +
             "(" +
             "\"" + domain_filepath + "\"," +
-            "\"" + problem_filepath + "\"," + 
+            "\"" + problem_filepath + "\"," +
             str(plan_solvable_cost) + "," +
             str(solve_time_milliseconds) +
             ")"
         )
 
     def get_original_problem_from_id(self, problem_id: int) -> tuple[int, str, str, int , int]:
+        """get everything from original problem regarding a id"""
         res = self.curs.execute("SELECT * FROM original_problems WHERE originalProblemID=" + str(problem_id))
         return_tuple = res.fetchone()
         return return_tuple
 
-    def insert_destroy_problems(self, problem_id:int,  problem_filepath: str, domain_filepath: str)-> None:
+    def insert_destroy_problems(self, problem_id:int,  problem_filepath: str, domain_filepath: str, problem_content: str, domain_content: str)-> None:
         """insert into the destroyed problems table"""
         self.curs.execute(
-            "INSERT INTO destroyed_problems(destroyedProblemID, domainFilePath, problemFilePath) VALUES " +
+            "INSERT INTO destroyed_problems(destroyedProblemID, domainFilePath, problemFilePath, domainContent, problemContent) VALUES " +
             "(" + str(problem_id) + "," +
             "\"" + domain_filepath + "\"," +
-            "\"" + problem_filepath + "\"" 
+            "\"" + problem_filepath + "\"," +
+            "\"" + domain_content + "\"," +
+            "\"" + problem_content + "\"" +
             ")"
         )
 

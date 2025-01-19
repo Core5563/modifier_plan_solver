@@ -9,7 +9,9 @@ CREATE TABLE original_problems (
 CREATE TABLE destroyed_problems (
     destroyedProblemID INTEGER PRIMARY KEY NOT NULL,
     domainFilePath TEXT NOT NULL,
-    problemFilePath TEXT NOT NULL
+    problemFilePath TEXT NOT NULL,
+    domainContent TEXT NOT NULL,
+    problemContent TEXT NOT NULL
 );
 
 CREATE TABLE added_preconditions (

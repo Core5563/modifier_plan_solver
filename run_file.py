@@ -14,6 +14,7 @@ from unified_planning.shortcuts import *
 from unified_planning.io import PDDLWriter, PDDLReader #type: ignore
 from source.utility.directory_scanner import DirectoryScanner
 from source.utility.db_handler import DBHandler
+from source.utility.problem_destroyer import ProblemDestroyer
 
 
 
@@ -295,7 +296,8 @@ def some_unsolvable_example_with_basic_code():
 
 def run_directory_scan():
     dir_scanner = DirectoryScanner()
-    dir_scanner.scan_benchmark('./evaluation')
+    for result in dir_scanner.scan_benchmark('./evaluation/ipc2014_cleaned_benchmark'):
+        print(result.domain_dir)
 
 def run_db_stuff():
     #remove file first
@@ -313,17 +315,17 @@ def run_db_stuff():
     curs.executescript(scriptdata)
 
 def run_db_handler():
-    dbh = DBHandler()
+    dbh = DBHandler("evaluation/database/eval.db")
     dbh.insert_into_original_problems("domain", "original", 1 , 2)
 
     needed_id = dbh.find_corresponding_original_problem_id("domain", "original")
     print(dbh.get_original_problem_from_id(needed_id))
-    dbh.insert_destroy_problems(needed_id ,"dm","pm")
+    dbh.insert_destroy_problems(needed_id ,"dm","pm", "domain_content", "problem_content")
     print(dbh.get_all_destroyed_problems())
     dbh.insert_into_results(needed_id, 4, 42)
     print(dbh.get_all_from_results())
 
-    dbh.insert_into_added_preconditions(needed_id, "someaction", "somefluent")
+    dbh.insert_into_added_preconditions(needed_id, "some_action", "some_fluent")
     print(dbh.get_all_add_preconditions())
     result_id = dbh.find_corresponding_result_id(needed_id, 4, 42)
     dbh.insert_into_left_preconditions_results(result_id, "another_action", "another_fluent")
@@ -334,6 +336,11 @@ def time_calc():
     start = timeit.default_timer()
     end = timeit.default_timer()
     print((end - start) * 10 ** 9)
+
+def run_problem_destroyer():
+    pd = ProblemDestroyer()
+    pd.load_all_problems()
+
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -348,5 +355,6 @@ if __name__ == '__main__':
     #some_unsolvable_example_with_basic_code()
     #run_directory_scan()
     #run_db_stuff()
-    run_db_handler()
+    #run_db_handler()
     #time_calc()
+    run_problem_destroyer()

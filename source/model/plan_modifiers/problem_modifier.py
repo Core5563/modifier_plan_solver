@@ -43,7 +43,7 @@ class ProblemModifier(ABC):
         """use a planner to solve and backtrack on the modified problem """
         #Solve modified Plan
         planer = OneshotPlanner(
-            problem_kind=self.modified_problem_info.problem.kind, 
+            problem_kind=self.modified_problem_info.problem.kind,
             optimality_guarantee=OptimalityGuarantee.SOLVED_OPTIMALLY)
         plan_results: PlanGenerationResult = planer.solve(self.modified_problem_info.problem)
 
