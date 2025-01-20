@@ -330,6 +330,7 @@ def run_db_handler():
     result_id = dbh.find_corresponding_result_id(needed_id, 4, 42)
     dbh.insert_into_left_preconditions_results(result_id, "another_action", "another_fluent")
     print(dbh.get_all_left_preconditions_results())
+    dbh.remove_db_file()
 
 
 def time_calc():
