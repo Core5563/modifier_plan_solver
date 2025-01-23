@@ -31,33 +31,50 @@ class DBHandler:
         res = self.curs.execute("SELECT * FROM destroyed_problems")
         return res.fetchall()
 
-    def insert_into_original_problems(self, problem_filepath: str, domain_filepath: str, plan_solvable_cost: int, solve_time_milliseconds:int):
+    def insert_into_original_problems(
+                self,
+                problem_filepath: str,
+                domain_filepath: str,
+                plan_solvable_cost: int,
+                solve_time_milliseconds:int,
+                error_text: str | None = None):
         """insert into original problem"""
         self.curs.execute(
-            "INSERT INTO original_problems(domainFilePath, problemFilePath, planSolvableCost, timeInMilliseconds) VALUES " +
+            "INSERT INTO original_problems(domainFilePath, problemFilePath, planSolvableCost, timeInMilliseconds, errorText) VALUES " +
             "(" +
             "\"" + domain_filepath + "\"," +
             "\"" + problem_filepath + "\"," +
             str(plan_solvable_cost) + "," +
-            str(solve_time_milliseconds) +
+            str(solve_time_milliseconds) + "," +
+            ( "NULL" if error_text is None else ("\"" + error_text.replace("\"", "#").replace("\n", "|") + "\"")) +
             ")"
         )
+        #replace("\"", "").replace("\n", "")
 
-    def get_original_problem_from_id(self, problem_id: int) -> tuple[int, str, str, int , int]:
-        """get everything from original problem regarding a id"""
-        res = self.curs.execute("SELECT * FROM original_problems WHERE originalProblemID=" + str(problem_id))
+    def get_original_problem_from_id(self, problem_id: int) -> tuple[str, str, int , int]:
+        """
+        get everything from original problem regarding a id
+        returns (domain_path, problem_path, cost, time_in_milliseconds)
+        """
+        res = self.curs.execute(
+            "SELECT domainFilePath," +
+            "problemFilePath," +
+            "planSolvableCost," +
+            "timeInMilliseconds " +
+            "FROM original_problems WHERE originalProblemID=" + str(problem_id))
         return_tuple = res.fetchone()
         return return_tuple
 
-    def insert_destroy_problems(self, problem_id:int,  problem_filepath: str, domain_filepath: str, problem_content: str, domain_content: str)-> None:
+    def insert_destroy_problems(self, problem_id:int,  problem_filepath: str, domain_filepath: str, problem_content: str, domain_content: str, error_text: str | None = None)-> None:
         """insert into the destroyed problems table"""
         self.curs.execute(
-            "INSERT INTO destroyed_problems(destroyedProblemID, domainFilePath, problemFilePath, domainContent, problemContent) VALUES " +
+            "INSERT INTO destroyed_problems(destroyedProblemID, domainFilePath, problemFilePath, domainContent, problemContent, errorText) VALUES " +
             "(" + str(problem_id) + "," +
             "\"" + domain_filepath + "\"," +
             "\"" + problem_filepath + "\"," +
             "\"" + domain_content + "\"," +
-            "\"" + problem_content + "\"" +
+            "\"" + problem_content + "\"," +
+            ( "NULL" if error_text is None else ("\"" + error_text.replace("\"", "#").replace("\n", "|") + "\"")) +
             ")"
         )
 
@@ -124,4 +141,13 @@ class DBHandler:
     def get_all_left_preconditions_results(self) -> list[tuple[int, str, str]]:
         """get everything from the left_preconditions_results table"""
         res = self.curs.execute("SELECT * FROM left_preconditions_results")
+        return res.fetchall()
+
+    def get_not_used_original_problem_ids(self) -> list[tuple[int]]:
+        """get all ids from problems which have not been destroyed and worked in the load in phase"""
+        res = self.curs.execute(
+            "SELECT original_problems.originalProblemID FROM original_problems " + 
+            "WHERE  original_problems.originalProblemID NOT IN (SELECT destroyedProblemID FROM destroyed_problems) " +
+            "AND original_problems.errorText IS NULL" 
+        )
         return res.fetchall()

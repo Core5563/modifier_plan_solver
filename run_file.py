@@ -256,6 +256,89 @@ def write_problem_read_problem_test():
     print("expected")
     print(expected_problem)
 
+def some_solvable_example_with_basic_code_plus_save():
+    problem = Problem()
+    #variables
+    x = Fluent("x", BoolType())
+    y = Fluent("y", BoolType())
+    z = Fluent("z", BoolType())
+    p = Fluent("p", BoolType())
+    q = Fluent("q", BoolType())
+    #add variables and set initial values
+    problem.add_fluent(x, default_initial_value=True)
+    problem.add_fluent(y, default_initial_value=True)
+    problem.add_fluent(z, default_initial_value=False)
+    problem.add_fluent(p, default_initial_value=False)
+    problem.add_fluent(q, default_initial_value=False)
+    #add goals
+    problem.add_goal(p)
+    problem.add_goal(q)
+    #actions
+    a1 = InstantaneousAction("a1")
+    a1.add_precondition(x)
+    a1.add_precondition(y)
+    a1.add_effect(z, True)
+    a1.add_effect(p, True)
+    problem.add_action(a1)
+    a2 = InstantaneousAction("a2")
+    a2.add_precondition(z)
+    a2.add_effect(q, True)
+    problem.add_action(a2)
+
+    #ground problem
+    #compiler = Compiler(name ="pyperplan")
+    compiler = Compiler(name ="up_grounder", params={"prune_actions": False})
+
+    compiler_result = compiler.compile(problem, compilation_kind = CompilationKind.GROUNDING)
+
+    to_save_problem = compiler_result.problem
+    writer = PDDLWriter(to_save_problem)
+    writer.write_domain("evaluation/easy_benchmark/subfolder1/subfolder2/domain.pddl")
+    writer.write_problem("evaluation/easy_benchmark/subfolder1/subfolder2/problem.pddl")
+
+def comparison_problem_fluents():
+    problem = Problem()
+    #variables
+    x = Fluent("x", BoolType())
+    y = Fluent("y", BoolType())
+    z = Fluent("z", BoolType())
+    p = Fluent("p", BoolType())
+    q = Fluent("q", BoolType())
+    #add variables and set initial values
+    problem.add_fluent(x, default_initial_value=True)
+    problem.add_fluent(y, default_initial_value=False)
+    problem.add_fluent(z, default_initial_value=False)
+    problem.add_fluent(p, default_initial_value=False)
+    problem.add_fluent(q, default_initial_value=False)
+    #add goals
+    problem.add_goal(p)
+    problem.add_goal(q)
+    #actions
+    a1 = InstantaneousAction("a1")
+    a1.add_precondition(x)
+    a1.add_precondition(y)
+    a1.add_effect(z, True)
+    a1.add_effect(p, True)
+    problem.add_action(a1)
+    a2 = InstantaneousAction("a2")
+    a2.add_precondition(z)
+    a2.add_effect(q, True)
+    problem.add_action(a2)
+
+    c1 = False
+    for initial_value_key, value in problem.initial_values.items():
+        print(initial_value_key.fluent().name + " " + str(value))
+    print("1: " + str())
+    for action in problem.actions:
+        print(action.name)
+        current_action: InstantaneousAction = action
+        for precon in current_action.preconditions:
+            print(precon.fluent().name)
+        for effect in current_action.effects:
+            print(effect.fluent.fluent().name + " " + str(effect.value))
+    for goal in problem.goals:
+        print(goal.fluent().name)
+
 
 def some_unsolvable_example_with_basic_code():
     problem = Problem()
@@ -341,6 +424,8 @@ def time_calc():
 def run_problem_destroyer():
     pd = ProblemDestroyer()
     pd.load_all_problems()
+    
+    pd.destroy_problems()
 
 
 if __name__ == '__main__':
@@ -358,4 +443,7 @@ if __name__ == '__main__':
     #run_db_stuff()
     #run_db_handler()
     #time_calc()
+    
     run_problem_destroyer()
+    #some_solvable_example_with_basic_code_plus_save()
+    #comparison_problem_fluents()

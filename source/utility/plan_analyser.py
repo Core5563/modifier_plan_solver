@@ -15,7 +15,7 @@ class PlanAnalyser:
         _ , action_metric = calculate_total_action_cost_metric(problem)
 
         #sum cost of plan
-        for action in plan.actions:
-            cost += action_metric[action.name]
+        for action_instance in plan.actions:
+            cost += action_metric[action_instance.action.name]
 
         return cost

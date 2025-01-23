@@ -12,6 +12,15 @@ def read_problem_from_file(domain_filepath:str, problem_filepath:str) -> Problem
     return reader.parse_problem(domain_filepath, problem_filepath)
 
 
+def ground_solvable_problem(problem: Problem) -> CompilerResult:
+    """reduce the problem to basic STRIPS also leaving unnecessary actions"""
+    compiler: Compiler = Compiler(problem_kind=problem.kind, compilation_kind=CompilationKind.GROUNDING)
+    compiler_result: CompilerResult = compiler.compile(
+        problem,
+        compilation_kind=CompilationKind.GROUNDING
+    )
+    return compiler_result
+
 def ground_problem(problem: Problem) -> CompilerResult:
     """
     reduce the problem to basic STRIPS and retain information to map back the actions to 
@@ -20,7 +29,7 @@ def ground_problem(problem: Problem) -> CompilerResult:
     #compiler: Compiler = Compiler(
     #    problem_kind=problem.kind,
     #    compilation_kind=CompilationKind.GROUNDING)
-    compiler: Compiler = Compiler(name ="up_grounder", params={"prune_actions": False})#, params={"remove_statics_from_initial_state=True": 'False', 'remove_irrelevant_operators': "False"})
+    compiler: Compiler = Compiler(name="up_grounder", params={"prune_actions": False})#, params={"remove_statics_from_initial_state=True": 'False', 'remove_irrelevant_operators': "False"})
 
     compiler_result: CompilerResult = compiler.compile(
         problem,
