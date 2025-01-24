@@ -327,7 +327,7 @@ def comparison_problem_fluents():
 
     c1 = False
     for initial_value_key, value in problem.initial_values.items():
-        print(initial_value_key.fluent().name + " " + str(value))
+        print(initial_value_key.fluent().name + " " + str(not value.is_false()))
     print("1: " + str())
     for action in problem.actions:
         print(action.name)

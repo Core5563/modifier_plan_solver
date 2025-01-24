@@ -1,8 +1,8 @@
 """import for reading in files"""
 from unified_planning.io import PDDLReader #type: ignore
 from unified_planning.model import Problem #type: ignore
-from unified_planning.shortcuts import Compiler, CompilationKind #type: ignore
-from unified_planning.engines.results import CompilerResult #type: ignore
+from unified_planning.shortcuts import Compiler, CompilationKind, OneshotPlanner #type: ignore
+from unified_planning.engines.results import CompilerResult, PlanGenerationResult #type: ignore
 from unified_planning.model.metrics import MinimizeActionCosts #type: ignore
 
 
