@@ -15,6 +15,7 @@ from unified_planning.io import PDDLWriter, PDDLReader #type: ignore
 from source.utility.directory_scanner import DirectoryScanner
 from source.utility.db_handler import DBHandler
 from source.utility.problem_destroyer import ProblemDestroyer
+from source.utility.file_util import remove_file
 
 
 
@@ -398,7 +399,11 @@ def run_db_stuff():
     curs.executescript(scriptdata)
 
 def run_db_handler():
-    dbh = DBHandler("evaluation/database/eval.db")
+    file_path = "evaluation/database/eval.db"
+    remove_file(file_path)
+    dbh = DBHandler(file_path)
+    dbh.initialize_db()
+
     dbh.insert_into_original_problems("domain", "original", 1 , 2)
 
     needed_id = dbh.find_corresponding_original_problem_id("domain", "original")
@@ -422,11 +427,26 @@ def time_calc():
     print((end - start) * 10 ** 9)
 
 def run_problem_destroyer():
-    pd = ProblemDestroyer()
+    file_path = "evaluation/database/eval.db"
+    remove_file(file_path)
+    handler = DBHandler(file_path)
+    handler.initialize_db()
+    handler.close()
+    pd = ProblemDestroyer("evaluation/database/eval.db")
     pd.load_all_problems()
-    
     pd.destroy_problems()
 
+def docker_init():
+    file_path = "persist/eval.db"
+    remove_file(file_path)
+    db_handler = DBHandler(file_path)
+    db_handler.initialize_db()
+
+def docker_scan():
+    file_path = "persist/eval.db"
+    db_handler = DBHandler(file_path)
+    print(db_handler.get_all_destroyed_problems())
+    print(db_handler.get_all_add_preconditions())
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -444,6 +464,8 @@ if __name__ == '__main__':
     #run_db_handler()
     #time_calc()
     
-    run_problem_destroyer()
+    #run_problem_destroyer()
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
+    #docker_init()
+    docker_scan()

@@ -29,3 +29,9 @@ class DirectoryScanner:
                     domain_dir + os.sep + "domain.pddl",
                     problem_dir + os.sep + "problem.pddl"))
         return content_list
+
+    def scan_for_directory(self, dir_path: str):
+        """scan specific directory"""
+        for root, something , files in os.walk(dir_path):
+            print(root)
+            print(files)

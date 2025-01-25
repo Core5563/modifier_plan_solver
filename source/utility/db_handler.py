@@ -6,10 +6,17 @@ class DBHandler:
     def __init__(self, database_file_filepath: str):
         #remove file first
         self.database_file_filepath: str = database_file_filepath
-        self.remove_db_file()
         self.con = sqlite3.connect(database_file_filepath)
         self.curs: sqlite3.Cursor = self.con.cursor()
-        self.initialize_db()
+
+    def commit(self):
+        """commit pending transactions"""
+        self.con.commit()
+
+    def close(self):
+        """close the connection"""
+        self.con.commit()
+        self.con.close()
 
     def initialize_db(self) -> None:
         """make first initialization of database"""
@@ -37,7 +44,7 @@ class DBHandler:
                 domain_filepath: str,
                 plan_solvable_cost: int,
                 solve_time_milliseconds:int,
-                error_text: str | None = None):
+                error_text: str | None = None) -> None:
         """insert into original problem"""
         self.curs.execute(
             "INSERT INTO original_problems(domainFilePath, problemFilePath, planSolvableCost, timeInMilliseconds, errorText) VALUES " +
@@ -49,7 +56,7 @@ class DBHandler:
             ( "NULL" if error_text is None else ("\"" + error_text.replace("\"", "#").replace("\n", "|") + "\"")) +
             ")"
         )
-        #replace("\"", "").replace("\n", "")
+        self.commit()
 
     def get_original_problem_from_id(self, problem_id: int) -> tuple[str, str, int , int]:
         """
@@ -77,6 +84,7 @@ class DBHandler:
             ( "NULL" if error_text is None else ("\"" + error_text.replace("\"", "#").replace("\n", "|") + "\"")) +
             ")"
         )
+        self.commit()
 
     def find_corresponding_original_problem_id(self, problem_filepath: str, domain_filepath: str)-> int:
         """returns problem id of the given problem"""
@@ -96,6 +104,7 @@ class DBHandler:
             "\"" + fluent_name + "\"" +
             ")"
         )
+        self.commit()
 
     def insert_into_results(self, destroyed_problem_id: int, modifier_version_id: int, time_in_milliseconds: int) -> None:
         """insert into results table"""
@@ -106,6 +115,7 @@ class DBHandler:
             str(time_in_milliseconds) +
             ")"
         )
+        self.commit()
 
     def get_all_add_preconditions(self):
         """get all entries from the add_preconditions table"""
@@ -137,6 +147,7 @@ class DBHandler:
             "\"" + fluent_name + "\"" + 
             ")"
         )
+        self.commit()
 
     def get_all_left_preconditions_results(self) -> list[tuple[int, str, str]]:
         """get everything from the left_preconditions_results table"""

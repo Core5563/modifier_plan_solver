@@ -14,18 +14,18 @@ from source.utility.plan_analyser import PlanAnalyser
 class ProblemDestroyer:
     """Destroy Problems"""
 
-    def __init__(self):
+    def __init__(self, database_file_name: str):
         #evaluation/easy_benchmark/subfolder1/subfolder2
         self.directory_scanner = DirectoryScanner()
         self.problem_list: list[ProblemDomainSet] = self.directory_scanner.scan_benchmark("./evaluation/easy_benchmark")
         #self.directory_scanner.scan_benchmark("./evaluation/ipc2014_cleaned_benchmark")
-        self.db_handler = DBHandler("evaluation/database/eval.db")
+        self.db_handler = DBHandler(database_file_name)
         self.plan_analyser = PlanAnalyser()
 
     def load_all_problems(self):
         """load all original problems into the database with time to solve and solution length"""
-        #pre_path = "evaluation/ipc2014_cleaned_benchmark/"
-        pre_path = "evaluation/easy_benchmark/"
+        pre_path = "evaluation/ipc2014_cleaned_benchmark/"
+        #pre_path = "evaluation/easy_benchmark/"
         #current_problem = self.problem_list[0]
         for current_problem in self.problem_list:
             #load problem
@@ -219,6 +219,10 @@ class ProblemDestroyer:
         print(added_precon_dict)
         print(self.db_handler.get_all_destroyed_problems())
         print(self.db_handler.get_all_add_preconditions())
+    
+    def close(self):
+        """close the problem destroyer"""
+        self.db_handler.close()
 
 
 def solve_problem_with_multithreading(problem: Problem, return_dict: dict[int, PlanGenerationResult]) -> None:
