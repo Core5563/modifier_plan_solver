@@ -467,5 +467,5 @@ if __name__ == '__main__':
     #run_problem_destroyer()
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
-    #docker_init()
-    docker_scan()
+    docker_init()
+    #docker_scan()
