@@ -170,7 +170,7 @@ class ProblemDestroyer:
             return_dict = manager.dict()
             process = Process(target=solve_problem_with_multithreading, name="", args=(problem_to_destroy, return_dict))
            
-            time_to_wait_in_minutes = 1
+            time_to_wait_in_minutes = 30
             process.start()
             process.join(time_to_wait_in_minutes * 60)
             
@@ -190,7 +190,7 @@ class ProblemDestroyer:
 
         #save results
         destroyed_domain_path = domain_path.replace("domain.pddl", "destroyed_domain.pddl")
-        destroyed_problem_path = problem_path.replace("problem.pddl", "problem_domain.pddl")
+        destroyed_problem_path = problem_path.replace("problem.pddl", "destroyed_problem.pddl")
         writer = PDDLWriter(problem_to_destroy)
         writer.write_domain(destroyed_domain_path)
         writer.write_problem(destroyed_problem_path)
