@@ -32,6 +32,8 @@ class ProblemDestroyer:
             domain_path: str = pre_path + current_problem.domain_dir
             problem_path: str = pre_path + current_problem.problem_dir
             try:
+                #todo check if problem already loaded in
+
                 loaded_problem = read_problem_from_file(domain_path, problem_path)
                 
                 #ground problem
@@ -42,6 +44,7 @@ class ProblemDestroyer:
                 planner = OneshotPlanner(name="fast-downward")
                 
                 #measure the time it takes to solve the problem
+                #todo: break problem execution if more than 30minute runtime
                 start = time.perf_counter_ns()
                 solution = planner.solve(grounded_information.problem)
                 end = time.perf_counter_ns()
