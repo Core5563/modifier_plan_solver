@@ -3,10 +3,11 @@ import time
 import traceback
 import random
 from multiprocessing import Process, Manager
-from unified_planning.io import PDDLWriter
-from unified_planning.engines.results import PlanGenerationResult, PlanGenerationResultStatus
-from unified_planning.shortcuts import OneshotPlanner, Problem, InstantaneousAction
+from unified_planning.io import PDDLWriter #type: ignore
+from unified_planning.engines.results import PlanGenerationResult, PlanGenerationResultStatus, CompilerResult #type: ignore
+from unified_planning.shortcuts import OneshotPlanner, Problem, InstantaneousAction #type: ignore
 from source.model.plan_modifiers.modifier_util import read_problem_from_file, ground_solvable_problem
+from source.utility.multiprocess_tasks import solve_problem_with_multithreading, solve_problem_with_multithreading_and_time_calc, ground_solvable_problem_multithread
 from source.utility.directory_scanner import DirectoryScanner, ProblemDomainSet
 from source.utility.db_handler import DBHandler
 from source.utility.plan_analyser import PlanAnalyser
@@ -17,7 +18,7 @@ class ProblemDestroyer:
     def __init__(self, database_file_name: str):
         #evaluation/easy_benchmark/subfolder1/subfolder2
         self.directory_scanner = DirectoryScanner()
-        self.problem_list: list[ProblemDomainSet] = self.directory_scanner.scan_benchmark("./evaluation/easy_benchmark")
+        self.problem_list: list[ProblemDomainSet] = self.directory_scanner.scan_benchmark("./evaluation/ipc2014_cleaned_benchmark")
         #self.directory_scanner.scan_benchmark("./evaluation/ipc2014_cleaned_benchmark")
         self.db_handler = DBHandler(database_file_name)
         self.plan_analyser = PlanAnalyser()
@@ -31,26 +32,112 @@ class ProblemDestroyer:
             #load problem
             domain_path: str = pre_path + current_problem.domain_dir
             problem_path: str = pre_path + current_problem.problem_dir
+            print("start loading problem d: " + domain_path + " p: " + problem_path)
             try:
-                #todo check if problem already loaded in
+                #if already loaded in continue
+                if self.db_handler.is_original_problem_in_database(problem_path, domain_path):
+                    print("problem already in database.")
+                    continue
 
+
+                #todo check if problem already loaded in
                 loaded_problem = read_problem_from_file(domain_path, problem_path)
                 
-                #ground problem
-                #grounded_information = ground_solvable_problem(loaded_problem)
-                grounded_information = ground_solvable_problem(loaded_problem)
-                #solve problem
-                #planner = OneshotPlanner(name="fast-downward")
-                planner = OneshotPlanner(name="fast-downward")
-                
-                #measure the time it takes to solve the problem
-                #todo: break problem execution if more than 30minute runtime
-                start = time.perf_counter_ns()
-                solution = planner.solve(grounded_information.problem)
-                end = time.perf_counter_ns()
+                #managers for return of time and solution
+                manager_time = Manager()
+                manager_result_solve = Manager()
+                manager_error = Manager()
+                manager_result_ground = Manager()
 
-                analyzer = PlanAnalyser()
+                return_solution_dict: dict[int, PlanGenerationResult] = manager_result_solve.dict()
+                return_grounding_dict: dict[int, CompilerResult] = manager_result_ground.dict()
+                return_time_dict: dict[int, int] = manager_time.dict()
+                return_error_dict: dict[int, str] = manager_error.dict()
+
+                #ground problem
+                time_to_wait_in_minutes_grounding = 30
+                process_grounding = Process(target=ground_solvable_problem_multithread, name="grounding", args=(loaded_problem, return_grounding_dict, return_error_dict))
+                print("start grounding problem")
+                process_grounding.start()
                 
+                #disregard process if it takes longer than the original process
+                process_grounding.join(time_to_wait_in_minutes_grounding * 60)
+                if process_grounding.is_alive():
+                    process_grounding.terminate()
+                    process_grounding.join()
+                    print("grounding exceeded " + str(time_to_wait_in_minutes_grounding) + "minutes aborting.")
+                    self.db_handler.insert_into_original_problems(
+                        problem_path,
+                        domain_path,
+                        0,
+                        0,
+                        "grounder exceeded time",
+                        longer_than_30_minutes=True
+                    )
+                    continue
+                
+                #if error occurred handle it
+                did_error_occuring_while_problem_grounding = 0 in return_error_dict
+                if did_error_occuring_while_problem_grounding:
+                    print("error while grounding")
+                    error_text = return_error_dict[0]
+                    return_error_dict.pop(0)
+                    print(error_text)
+                    self.db_handler.insert_into_original_problems(
+                    problem_path,
+                    domain_path,
+                    0,
+                    0,
+                    error_text
+                    )
+                    continue
+
+                grounded_information = return_grounding_dict[0]
+                print("info")
+                print(grounded_information.problem.kind)
+                to_solve_problem = grounded_information.problem
+
+                
+                process_solving = Process(target=solve_problem_with_multithreading_and_time_calc, name="solving", args=(to_solve_problem, return_solution_dict, return_time_dict, return_error_dict))
+            
+                time_to_wait_in_minutes_solving = 30
+                print("start solving problem")
+                process_solving.start()
+                process_solving.join(time_to_wait_in_minutes_solving * 60)
+                #solve_problem_with_multithreading_and_time_calc(to_solve_problem, return_solution_dict, return_time_dict, return_error_dict)
+                if process_solving.is_alive():
+                    print("problem took to long aborting.")
+                    process_solving.terminate()
+                    process_solving.join()
+                    self.db_handler.insert_into_original_problems(
+                        problem_path,
+                        domain_path,
+                        0,
+                        0,
+                        None,
+                        longer_than_30_minutes=True
+                    )
+                    continue
+
+                did_error_occuring_while_problem_solving = 0 in return_error_dict
+                if did_error_occuring_while_problem_solving:
+                    error_text = return_error_dict[0]
+                    print("found error while solving")
+                    print(error_text)
+                    self.db_handler.insert_into_original_problems(
+                    problem_path,
+                    domain_path,
+                    0,
+                    0,
+                    error_text
+                    )
+                    continue
+                
+                #analyze plan to get results
+                solution: PlanGenerationResult = return_solution_dict[0]
+                analyzer = PlanAnalyser()
+                start = return_time_dict[0]
+                end = return_time_dict[1]
                 plan_cost: int = analyzer.calculate_plan_cost(grounded_information.problem, solution.plan)
                 time_in_milliseconds: int = int((end  - start) // 10 ** 6)
                 self.db_handler.insert_into_original_problems(
@@ -73,11 +160,12 @@ class ProblemDestroyer:
         list_of_unused_problems = self.db_handler.get_not_used_original_problem_ids()
         for problem_tuple in list_of_unused_problems:
             original_problem_id = problem_tuple[0]
+            print("problem analyzing for " + str(original_problem_id))
             try:
                 self.destroy_problem(original_problem_id)
             except Exception:
                 error_text = traceback.format_exc()
-                print(error_text)
+                print("inner exception occured. saving error for problem\n" + error_text)
                 self.db_handler.insert_destroy_problems(
                     original_problem_id,
                     "",
@@ -218,18 +306,10 @@ class ProblemDestroyer:
         for action_name, list_fluent_names in added_precon_dict.items():
             for fluent_name in list_fluent_names:
                 self.db_handler.insert_into_added_preconditions(original_problem_id, action_name, fluent_name)
-        print(problem_to_destroy)
-        print(added_precon_dict)
-        print(self.db_handler.get_all_destroyed_problems())
-        print(self.db_handler.get_all_add_preconditions())
+        print("successfully destroyed problem.")
     
     def close(self):
         """close the problem destroyer"""
         self.db_handler.close()
 
 
-def solve_problem_with_multithreading(problem: Problem, return_dict: dict[int, PlanGenerationResult]) -> None:
-    """solve with fast-downward planner"""
-    planner = OneshotPlanner(name="fast-downward")
-    solution = planner.solve(problem)
-    return_dict[0] = solution

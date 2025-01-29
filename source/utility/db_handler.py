@@ -44,19 +44,37 @@ class DBHandler:
                 domain_filepath: str,
                 plan_solvable_cost: int,
                 solve_time_milliseconds:int,
-                error_text: str | None = None) -> None:
+                error_text: str | None = None,
+                longer_than_30_minutes: bool = False) -> None:
         """insert into original problem"""
         self.curs.execute(
-            "INSERT INTO original_problems(domainFilePath, problemFilePath, planSolvableCost, timeInMilliseconds, errorText) VALUES " +
+            "INSERT INTO original_problems(domainFilePath, problemFilePath, planSolvableCost, timeInMilliseconds, errorText, longerThan30Minutes) VALUES " +
             "(" +
             "\"" + domain_filepath + "\"," +
             "\"" + problem_filepath + "\"," +
             str(plan_solvable_cost) + "," +
             str(solve_time_milliseconds) + "," +
-            ( "NULL" if error_text is None else ("\"" + error_text.replace("\"", "#").replace("\n", "|") + "\"")) +
+            ( "NULL" if error_text is None else ("\"" + error_text.replace("\"", "#").replace("\n", "|") + "\"")) + "," +
+            ("TRUE" if longer_than_30_minutes else "FALSE") +
             ")"
         )
         self.commit()
+
+    def get_all_original_problems(self) -> list[tuple[int, str, str, int, int, str, int]]:
+        """return all saved problem types"""
+        res = self.curs.execute("SELECT * FROM original_problems")
+        return res.fetchall()
+
+    def is_original_problem_in_database(self, problem_path: str, domain_path: str) -> bool:
+        """return if problem already inside the database"""
+        self.curs.execute("SELECT * FROM original_problems WHERE " +
+            "problemFilePath=\"" + problem_path + "\" " +
+            "AND domainFilePath=\"" + domain_path + "\""
+        )
+        result = self.curs.fetchone()
+
+        return result is not None
+
 
     def get_original_problem_from_id(self, problem_id: int) -> tuple[str, str, int , int]:
         """
@@ -159,6 +177,7 @@ class DBHandler:
         res = self.curs.execute(
             "SELECT original_problems.originalProblemID FROM original_problems " + 
             "WHERE  original_problems.originalProblemID NOT IN (SELECT destroyedProblemID FROM destroyed_problems) " +
-            "AND original_problems.errorText IS NULL" 
+            "AND original_problems.errorText IS NULL " + 
+            "AND original_problems.longerThan30Minutes != FALSE" 
         )
         return res.fetchall()

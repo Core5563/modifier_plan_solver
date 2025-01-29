@@ -418,6 +418,10 @@ def run_db_handler():
     result_id = dbh.find_corresponding_result_id(needed_id, 4, 42)
     dbh.insert_into_left_preconditions_results(result_id, "another_action", "another_fluent")
     print(dbh.get_all_left_preconditions_results())
+    print(dbh.is_original_problem_in_database("not in", "database"))
+    print(dbh.is_original_problem_in_database("domain", "original"))
+    print(dbh.get_all_original_problems())
+    print(dbh.get_not_used_original_problem_ids())
     dbh.remove_db_file()
 
 
@@ -428,10 +432,10 @@ def time_calc():
 
 def run_problem_destroyer():
     file_path = "evaluation/database/eval.db"
-    remove_file(file_path)
-    handler = DBHandler(file_path)
-    handler.initialize_db()
-    handler.close()
+    #remove_file(file_path)
+    #handler = DBHandler(file_path)
+    #handler.initialize_db()
+    #handler.close()
     pd = ProblemDestroyer("evaluation/database/eval.db")
     pd.load_all_problems()
     pd.destroy_problems()

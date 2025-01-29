@@ -3,8 +3,9 @@ CREATE TABLE original_problems (
     domainFilePath TEXT NOT NULL,
     problemFilePath TEXT NOT NULL,
     planSolvableCost INT NOT NULL,
-    timeInMilliseconds INT NOT NULL,
-    errorText TEXT
+    timeInMilliseconds INTEGER NOT NULL,
+    errorText TEXT,
+    longerThan30Minutes INTEGER
 );
 
 CREATE TABLE destroyed_problems (
