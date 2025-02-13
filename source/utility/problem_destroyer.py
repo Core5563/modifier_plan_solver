@@ -5,7 +5,7 @@ import random
 from multiprocessing import Process, Manager
 from unified_planning.io import PDDLWriter #type: ignore
 from unified_planning.engines.results import PlanGenerationResult, PlanGenerationResultStatus, CompilerResult #type: ignore
-from unified_planning.shortcuts import OneshotPlanner, Problem, InstantaneousAction #type: ignore
+from unified_planning.shortcuts import Problem, InstantaneousAction, FNode #type: ignore
 from source.model.plan_modifiers.modifier_util import read_problem_from_file, ground_solvable_problem
 from source.utility.multiprocess_tasks import solve_problem_with_multithreading, solve_problem_with_multithreading_and_time_calc, ground_solvable_problem_multithread
 from source.utility.directory_scanner import DirectoryScanner, ProblemDomainSet
@@ -188,10 +188,10 @@ class ProblemDestroyer:
         
         #ground the problem
         grounded_information = ground_solvable_problem(loaded_problem)
-
         #initalize problem to destroy
         problem_to_destroy: Problem = grounded_information.problem.clone()
-
+        
+        #print(problem_to_destroy)
         is_problem_solvable: bool = True
 
         #remember which preconditions where introduced to which actions
@@ -201,25 +201,33 @@ class ProblemDestroyer:
             #for random initialization
             fluent_weights: dict[str, int]= {}
 
+            #remember fluents
+            fluent_dict: dict[str, FNode] = {}
+
             #choose fluents according to probability
-            for current_fluent in problem_to_destroy.fluents:
-                fluent_weights[current_fluent.name] = 1
+            for current_initial_value in problem_to_destroy.initial_values:
+                fluent_dict[str(current_initial_value)] = current_initial_value
+                fluent_weights[str(current_initial_value)] = 1
             
             total_actions_count = len(problem_to_destroy.actions)
 
             #if fluent not in initial set then increase probability
             for initial_value_key, value in problem_to_destroy.initial_values.items():
                 if value.is_false():
-                    fluent_weights[initial_value_key.fluent().name] += total_actions_count
+                    #todo:fluent_weights[initial_value_key.fluent().name] += total_actions_count
+                    fluent_weights[str(initial_value_key)] += total_actions_count
             #if fluent not in precondition and not in positive effects
             #increase probability
             action_weights: dict[str, int] = {}
             for action in problem_to_destroy.actions:
                 current_action: InstantaneousAction = action
-                precon_names: list[str] = [precon.fluent().name for precon in current_action.preconditions]
-                negative_effects: list[str] = [effect.fluent.fluent().name for effect in current_action.effects if not effect.value]
-                positive_effects: list[str] = [effect.fluent.fluent().name for effect in current_action.effects if effect.value]
-                
+                #todo: precon_names: list[str] = [precon.fluent().name for precon in current_action.preconditions]
+                #todo: negative_effects: list[str] = [effect.fluent.fluent().name for effect in current_action.effects if not effect.value]
+                #todo: positive_effects: list[str] = [effect.fluent.fluent().name for effect in current_action.effects if effect.value]
+                precon_names: list[str] = [str(precon) for precon in current_action.preconditions]
+                negative_effects: list[str] = [str(effect.fluent) for effect in current_action.effects if not effect.value]
+                positive_effects: list[str] = [str(effect.fluent) for effect in current_action.effects if effect.value]
+
                 #remember weights
                 action_weights[current_action.name] = len(precon_names)
                 for fluent_name in fluent_weights:
@@ -234,7 +242,8 @@ class ProblemDestroyer:
                         fluent_weights[fluent_name] += 1
             #if in goal state increase value
             for goal in problem_to_destroy.goals:
-                fluent_weights[goal.fluent().name] += total_actions_count
+                #todo:fluent_weights[goal.fluent().name] += total_actions_count
+                fluent_weights[str(goal)] += total_actions_count
             #prepare choosing value randomly
             fluent_name_list = list(fluent_weights.keys())
             fluent_weight_list = list(fluent_weights.values())
@@ -247,10 +256,12 @@ class ProblemDestroyer:
                 [random_chosen_action_name] = random.choices(action_name_list, weights=action_weight_list, k=1)
                 current_action: InstantaneousAction = problem_to_destroy.action(random_chosen_action_name)
                 #check if precondition already exists
-                if random_chosen_fluent_name in [precon.fluent().name for precon in current_action.preconditions]:
+                #todo:if random_chosen_fluent_name in [precon.fluent().name for precon in current_action.preconditions]:
+                #todo:    continue
+                if random_chosen_fluent_name in [str(precon)for precon in current_action.preconditions]:
                     continue
 
-                current_action.add_precondition(problem_to_destroy.fluent(random_chosen_fluent_name))
+                current_action.add_precondition(fluent_dict[random_chosen_fluent_name])
                 if random_chosen_action_name not in added_precon_dict:
                     added_precon_dict[random_chosen_action_name] = []
                 added_precon_dict[random_chosen_action_name].append(random_chosen_fluent_name)
@@ -311,5 +322,3 @@ class ProblemDestroyer:
     def close(self):
         """close the problem destroyer"""
         self.db_handler.close()
-
-

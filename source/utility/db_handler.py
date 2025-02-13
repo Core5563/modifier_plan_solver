@@ -181,3 +181,9 @@ class DBHandler:
             "AND original_problems.longerThan30Minutes != FALSE" 
         )
         return res.fetchall()
+
+    def clear_destroyed_problems(self) -> None:
+        """clear destroyed problems"""
+        self.curs.execute("DELETE FROM destroyed_problems")
+        self.commit()
+
