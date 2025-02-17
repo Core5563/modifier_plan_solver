@@ -161,7 +161,7 @@ def create_resulting_actions(
 
         #create choosing to leave precondition fluent
         choose_leave_precondition_fluent_name = (
-            LinModifier.CHOOSE_LEAVE_FLUENT_PREFIX + str(current_precondition) 
+            LinModifier.CHOOSE_LEAVE_FLUENT_PREFIX + str(current_precondition)
             + "_" + original_action.name + "_" + uuid_name_modifier)
         choose_leave_precondition_fluent = Fluent(choose_leave_precondition_fluent_name, BoolType())
 

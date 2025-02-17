@@ -483,8 +483,10 @@ def docker_init():
 def docker_scan():
     file_path = "persist/eval.db"
     db_handler = DBHandler(file_path)
-    print(db_handler.get_all_destroyed_problems())
-    print(db_handler.get_all_add_preconditions())
+    for (probelm_id, d_path, p_path, cost, time, error, longerThan30min) in db_handler.get_all_original_problems():
+        print((probelm_id, d_path, p_path, cost, time, 'error' if error is not  None else 'fine', longerThan30min)) 
+    #print(db_handler.get_all_original_problems())
+    #print(db_handler.get_all_add_preconditions())
 
 def docker_loock_into():
     file_path = "evaluation/database/eval.db"
@@ -531,8 +533,8 @@ if __name__ == '__main__':
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
     #docker_init()
-    #docker_scan()
-    docker_loock_into()
+    docker_scan()
+    #docker_loock_into()
 
 
 
