@@ -187,3 +187,8 @@ class DBHandler:
         self.curs.execute("DELETE FROM destroyed_problems")
         self.commit()
 
+    def clear_added_preconditions(self) -> None:
+        """clear added preconditions"""
+        self.curs.execute("DELETE FROM added_preconditions")
+        self.commit()
+

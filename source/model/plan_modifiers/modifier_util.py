@@ -14,7 +14,7 @@ def read_problem_from_file(domain_filepath:str, problem_filepath:str) -> Problem
 
 def ground_solvable_problem(problem: Problem) -> CompilerResult:
     """reduce the problem to basic STRIPS also leaving unnecessary actions"""
-    compiler: Compiler = Compiler(problem_kind=problem.kind, compilation_kind=CompilationKind.GROUNDING)
+    compiler: Compiler = Compiler(name="pyperplan")
     compiler_result: CompilerResult = compiler.compile(
         problem,
         compilation_kind=CompilationKind.GROUNDING

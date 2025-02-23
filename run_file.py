@@ -273,23 +273,6 @@ def run_exception_fluent():
     print([fluent.name for fluent in problem_grounded.fluents])
     print(problem_grounded.fluent("at_kitchen_bread"))
     problem_grounded.action("move_tray_tray3_table2_table1").add_precondition(problem_grounded.fluent("at_kitchen_bread"))
-    """ 
-    problem = Problem()
-    x = Fluent("x")
-    y = Fluent("y")
-    problem.add_fluent(x, default_initial_value=True)
-    problem.add_fluent(y, default_initial_value=True)
-    a1 = InstantaneousAction("a1")
-    a1.add_precondition(x)
-    a1.add_effect(y, True)
-    problem.add_action(a1)
-
-
-    problem.action("a1").add_precondition(problem.fluent("y"))
-    print(problem)
-    """
-
-    
 
 def some_solvable_example_with_basic_code_plus_save():
     problem = Problem()
@@ -483,18 +466,25 @@ def docker_init():
 def docker_scan():
     file_path = "persist/eval.db"
     db_handler = DBHandler(file_path)
-    for (probelm_id, d_path, p_path, cost, time, error, longerThan30min) in db_handler.get_all_original_problems():
-        print((probelm_id, d_path, p_path, cost, time, 'error' if error is not  None else 'fine', longerThan30min)) 
+    
+    #for (probelm_id, d_path, p_path, cost, time, error, longerThan30min) in db_handler.get_all_original_problems():
+    #    print((probelm_id, d_path, p_path, cost, time, 'error' if error is not  None else 'fine', longerThan30min)) 
+    
     #print(db_handler.get_all_original_problems())
-    #print(db_handler.get_all_add_preconditions())
+    
+    print(db_handler.get_all_destroyed_problems())
+    print("_________________________________")
+    print(db_handler.get_all_add_preconditions())
+    db_handler.close()
 
 def docker_loock_into():
-    file_path = "evaluation/database/eval.db"
+    #file_path = "evaluation/database/eval.db"
+    file_path = "evaluation/baseline_destroyed/eval.db"
     db_handler = DBHandler(file_path)
     print(db_handler.get_all_original_problems())
     print("====================================")
     for (id, path_domain, path_problem, content_domain, content_problem, error_text) in db_handler.get_all_destroyed_problems():
-        print_tuple = (id, path_domain, path_problem, content_domain, content_problem, '' if error_text is None else 'error')
+        print_tuple = (id, path_domain, path_problem, '' if error_text is None else 'error')
         print(print_tuple)
         if error_text is not None:
             error_text_str: str = error_text
@@ -507,6 +497,7 @@ def run_clear_destroy_problems():
     #file_path = "evaluation/baseline_destroyed/eval.db"
     file_path = "evaluation/database/eval.db"
     db_handler = DBHandler(file_path)
+    db_handler.clear_destroyed_problems()
     db_handler.clear_destroyed_problems()
     print(db_handler.get_all_original_problems())
     print(db_handler.get_all_destroyed_problems())
@@ -533,8 +524,8 @@ if __name__ == '__main__':
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
     #docker_init()
-    docker_scan()
-    #docker_loock_into()
+    #docker_scan()
+    docker_loock_into()
 
 
 
