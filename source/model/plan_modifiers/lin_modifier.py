@@ -1,7 +1,7 @@
 """imports for planning"""
 from uuid import uuid4
 from unified_planning.shortcuts import ( #type: ignore
-    Action, InstantaneousAction, Problem, Fluent, BoolType, MinimizeActionCosts)
+    Action, InstantaneousAction, Problem, Fluent, BoolType, MinimizeActionCosts, FNode)
 from source.model.plan_modifiers.problem_modifier import ProblemModifier 
 from source.model.plan_modifiers.modified_plan import ModifiedProblemInfo
 
@@ -23,7 +23,7 @@ class LinModifier(ProblemModifier):
 
     def  _transform_grounded_plan(self) -> ModifiedProblemInfo:
         #clone the problem
-        problem: Problem = self.grounded_information.problem
+        problem: Problem = self.grounded_problem
         modified_problem = problem.clone()
 
         #altered problem is saturated with new actions
@@ -81,7 +81,7 @@ def create_resulting_actions(
         modified_problem: Problem,
         modified_grounded_actions_mapping: dict[str, str],
         name_to_action: dict[str, InstantaneousAction],
-        action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[Fluent]]],
+        action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[FNode]]],
         cost_mapping_grounded: dict[str, int],
         modified_problem_cost_mapping: dict[Action, int],
         cost_cut_precondition: int,
@@ -176,6 +176,7 @@ def create_resulting_actions(
         leave_one_time_precondition_action.add_precondition(choose_leave_precondition_fluent)
         leave_one_time_precondition_action.add_effect(connect_leave_precondition_fluent, True)
         leave_one_time_precondition_action.add_effect(choose_take_precondition_fluent, False)
+        leave_one_time_precondition_action.add_effect(choose_leave_precondition_fluent, False)
 
         leave_precondition_action.add_precondition(connect_leave_precondition_fluent)
         leave_precondition_action.add_effect(precondition_fluent, True)

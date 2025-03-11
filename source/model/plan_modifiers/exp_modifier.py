@@ -1,6 +1,6 @@
 """ Imports"""
 from uuid import uuid4
-from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Fluent, BoolType #type: ignore
+from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Fluent, BoolType, FNode #type: ignore
 from .problem_modifier import ProblemModifier
 from source.model.plan_modifiers.modified_plan import ModifiedProblemInfo
 
@@ -11,7 +11,7 @@ class ExpModifier(ProblemModifier):
 
     def _transform_grounded_plan(self) -> ModifiedProblemInfo:
         #clone the problem
-        problem: Problem = self.grounded_information.problem
+        problem: Problem = self.grounded_problem 
         modified_problem = problem.clone()
 
         #altered problem is saturated with new actions
@@ -23,7 +23,7 @@ class ExpModifier(ProblemModifier):
 
         #create mappings for backtracking later
         modified_grounded_actions_mapping = dict[str, str]()
-        action_to_left_precondition_mapping = dict[str, tuple[InstantaneousAction, list[Fluent]]]()
+        action_to_left_precondition_mapping = dict[str, tuple[InstantaneousAction, list[FNode]]]()
         name_to_action = dict[str, InstantaneousAction]()
 
         for action in problem.actions:
@@ -108,7 +108,7 @@ def create_actions_according_to_permutation(
         original_action: InstantaneousAction,
         modified_grounded_actions_mapping: dict[str, str],
         name_to_action: dict[str, InstantaneousAction],
-        action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[Fluent]]],
+        action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[FNode]]],
         cost_mapping_grounded: dict[str, int],
         modified_problem_cost_mapping: dict[Action, int],
         cost_cut_precondition: int,
@@ -183,7 +183,7 @@ def create_resulting_actions(
         modified_problem: Problem,
         modified_grounded_actions_mapping: dict[str, str],
         name_to_action: dict[str, InstantaneousAction],
-        action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[Fluent]]],
+        action_to_left_precondition_mapping: dict[str, tuple[InstantaneousAction, list[FNode]]],
         cost_mapping_grounded: dict[str, int],
         modified_problem_cost_mapping: dict[Action, int],
         cost_cut_precondition: int
@@ -226,13 +226,18 @@ def create_resulting_actions(
     #make sure only one action can be executed
     #by adding atoms to the initial state
     #later deleting atoms when choosing an action
+    choose_precondition_name = "choose_precon_" + original_action.name + str(uuid4())
+    choose_precondition_fluent = Fluent(choose_precondition_name, BoolType())
+    modified_problem.add_fluent(choose_precondition_fluent, default_initial_value=True)
     for fluent, (entry_action, exit_action) in choose_preconditions.items():
-        modified_problem.add_fluent(fluent, default_initial_value=True)
-        entry_action.add_precondition(fluent)
-        for compare_fluent in choose_preconditions.keys():
-            if fluent.name == compare_fluent.name:
-                continue
-            entry_action.add_effect(compare_fluent, False)
+        # modified_problem.add_fluent(fluent, default_initial_value=True)
+        # entry_action.add_precondition(fluent)
+        # for compare_fluent in choose_preconditions.keys():
+        #     if fluent.name == compare_fluent.name:
+        #         continue
+        #     entry_action.add_effect(compare_fluent, False)
+        entry_action.add_precondition(choose_precondition_fluent)
+        entry_action.add_effect(choose_precondition_fluent, False)
 
         #add entry and exit actions to plan
         modified_problem.add_action(entry_action)

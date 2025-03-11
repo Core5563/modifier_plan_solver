@@ -7,6 +7,7 @@ import unified_planning.shortcuts  # type: ignore
 import sqlite3
 import os
 import timeit
+from multiprocessing import Process, Manager, Queue
 from unified_planning.engines.results import CompilerResult  # type: ignore
 from source.model.plan_modifiers.exp_modifier import ExpModifier, permutation_info
 from source.model.plan_modifiers.lin_modifier import LinModifier
@@ -427,12 +428,12 @@ def run_db_handler():
     print(dbh.get_original_problem_from_id(needed_id))
     dbh.insert_destroy_problems(needed_id ,"dm","pm", "domain_content", "problem_content")
     print(dbh.get_all_destroyed_problems())
-    dbh.insert_into_results(needed_id, 4, 42)
+    dbh.insert_into_results(needed_id, 1, 42, None)
     print(dbh.get_all_from_results())
 
     dbh.insert_into_added_preconditions(needed_id, "some_action", "some_fluent")
     print(dbh.get_all_add_preconditions())
-    result_id = dbh.find_corresponding_result_id(needed_id, 4, 42)
+    result_id = dbh.find_corresponding_result_id(needed_id, 1)
     dbh.insert_into_left_preconditions_results(result_id, "another_action", "another_fluent")
     print(dbh.get_all_left_preconditions_results())
     print(dbh.is_original_problem_in_database("not in", "database"))
@@ -504,6 +505,34 @@ def run_clear_destroy_problems():
     print(db_handler.get_all_add_preconditions())
     db_handler.close()
 
+def run_export_db():
+    db_file = 'evaluation/database/eval.db'
+    dump_file = 'evaluation/database/dump.sql'
+    con = sqlite3.connect(db_file)
+    with open(dump_file, 'w', encoding="utf-8") as f:
+        for line in con.iterdump():
+            f.write('%s\n' % line)
+    #sh("sqlite3 #{db_file} saraksts > from_file/test.sql")
+
+class SomeObject:
+    def __init__(self):
+        self.a = 1
+
+def mutate_smth(queue: Queue) -> None:
+    obj = queue.get()
+    obj.a = 2
+    queue.put(obj)
+
+def run_mutate():
+    smth = SomeObject()
+    queue = Queue()
+    queue.put(smth)
+    process = Process(target= mutate_smth, args=(queue,))
+    process.start()
+    process.join()
+    smth = queue.get()
+    print(smth.a)
+
 if __name__ == '__main__':
     # readInWithActionCost()
     # instantiatePlanModifier()
@@ -520,15 +549,18 @@ if __name__ == '__main__':
     #run_db_handler()
     #time_calc()
     #run_exception_fluent()
-    
+    run_mutate()
+
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
     #docker_init()
     #docker_scan()
-    docker_loock_into()
+    #docker_loock_into()
 
 
 
     #run_clear_destroy_problems()
     #run_problem_destroyer()
+
+    #run_export_db()
     pass

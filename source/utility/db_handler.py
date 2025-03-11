@@ -38,6 +38,14 @@ class DBHandler:
         res = self.curs.execute("SELECT * FROM destroyed_problems")
         return res.fetchall()
 
+    def get_working_destroyed_problems(self) -> list[tuple[int, str, str]]:
+        """returns (id, domain_content, problem_content)"""
+        res = self.curs.execute(
+            "SELECT destroyedProblemID, domainContent, problemContent FROM destroyed_problems " + 
+            "WHERE errorText IS NULL"
+        )
+        return res.fetchall()
+
     def insert_into_original_problems(
                 self,
                 problem_filepath: str,
@@ -75,6 +83,16 @@ class DBHandler:
 
         return result is not None
 
+
+    def is_result_already_in_database(self, destroyed_problem_id: int, modifier_id: int) -> bool:
+        """returns if the result is already in the database"""
+        self.curs.execute("SELECT * FROM results WHERE " +
+            "destroyedProblemID=\"" + destroyed_problem_id + "\" " +
+            "AND modifierVersionID=\"" + modifier_id + "\""
+        )
+        result = self.curs.fetchone()
+
+        return result is not None
 
     def get_original_problem_from_id(self, problem_id: int) -> tuple[str, str, int , int]:
         """
@@ -124,13 +142,14 @@ class DBHandler:
         )
         self.commit()
 
-    def insert_into_results(self, destroyed_problem_id: int, modifier_version_id: int, time_in_milliseconds: int) -> None:
+    def insert_into_results(self, destroyed_problem_id: int, modifier_version_id: int, time_in_milliseconds: int | None, error_text: str | None) -> None:
         """insert into results table"""
-        self.curs.execute("INSERT INTO results(destroyedProblemID, modifierVersionID, timeInMilliseconds) VALUES " +
+        self.curs.execute("INSERT INTO results(destroyedProblemID, modifierVersionID, timeInMilliseconds, errorText) VALUES " +
             "(" + 
             str(destroyed_problem_id) + "," +
             str(modifier_version_id) + "," +
-            str(time_in_milliseconds) +
+            ("NULL" if time_in_milliseconds is None else str(time_in_milliseconds)) + "," +
+            ( "NULL" if error_text is None else ("\"" + error_text.replace("\"", "#").replace("\n", "|") + "\"")) +
             ")"
         )
         self.commit()
@@ -145,12 +164,11 @@ class DBHandler:
         res = self.curs.execute("SELECT * FROM results")
         return res.fetchall()
     
-    def find_corresponding_result_id(self, destroyed_problem_id: int, modifier_version_id: int, time_in_milliseconds: int) -> int:
+    def find_corresponding_result_id(self, destroyed_problem_id: int, modifier_version_id: int) -> int:
         """find resultID of the corresponding entries"""
         res = self.curs.execute("SELECT resultID FROM results WHERE " +
             "destroyedProblemID=" + str(destroyed_problem_id) + " " + 
-            "AND modifierVersionID=" + str(modifier_version_id) + " " +
-            "AND timeInMilliseconds=" + str(time_in_milliseconds)
+            "AND modifierVersionID=" + str(modifier_version_id)
         )
         result_id = res.fetchone()[0]
         return result_id

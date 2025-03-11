@@ -11,6 +11,10 @@ def read_problem_from_file(domain_filepath:str, problem_filepath:str) -> Problem
     reader = PDDLReader()
     return reader.parse_problem(domain_filepath, problem_filepath)
 
+def read_problem_from_text(domain_str:str, problem_str: str) -> Problem:
+    """read in problem from text"""
+    reader = PDDLReader()
+    return reader.parse_problem_string(domain_str, problem_str)
 
 def ground_solvable_problem(problem: Problem) -> CompilerResult:
     """reduce the problem to basic STRIPS also leaving unnecessary actions"""

@@ -5,21 +5,30 @@ from unified_planning.model import Problem #type: ignore
 from unified_planning.shortcuts import OneshotPlanner, OptimalityGuarantee, InstantaneousAction, Fluent #type: ignore
 from unified_planning.engines.results import CompilerResult, PlanGenerationResult, PlanGenerationResultStatus #type: ignore
 from source.model.plan_modifiers.modifier_util import (
-    read_problem_from_file, ground_problem, calculate_total_action_cost_metric, cost_leaving_precondition)
+    read_problem_from_file, ground_problem, calculate_total_action_cost_metric, cost_leaving_precondition, read_problem_from_text)
 from source.model.plan_modifiers.modified_plan import ModifiedProblemInfo, ModifiedPlanInformation
 from source.model.plan_modifiers.modified_plan_validator import ModifiedPlanValidator
 
 
 class ProblemModifier(ABC):
     """abstract base class for modification of a Problem"""
-    def __init__(self, problem: Problem, calc_leave_precon: Callable[[Problem], int] = cost_leaving_precondition):
+    def __init__(self, problem: Problem, calc_leave_precon: Callable[[Problem], int] = cost_leaving_precondition, is_grounded: bool = False):
         #remember original problem
         self.original_problem: Problem = problem
+
+
         #ground the problem
-        self.grounded_information: CompilerResult = ground_problem(problem)
+        self.grounded_problem: Problem = Problem()
+        if is_grounded:
+            self.grounded_problem = self.original_problem
+        else:
+            self.grounded_information: CompilerResult = ground_problem(problem)
+            self.grounded_problem = self.grounded_information.problem
+
+
         #calculate and assign cost information
-        _ , mapping = calculate_total_action_cost_metric(self.grounded_information.problem)
-        self.cost_cut_precondition: int = calc_leave_precon(self.grounded_information.problem)
+        _ , mapping = calculate_total_action_cost_metric(self.grounded_problem)
+        self.cost_cut_precondition: int = calc_leave_precon(self.grounded_problem)
         self.cost_mapping: dict[str, int] = mapping
         #create altered plan
         self.modified_problem_info: ModifiedProblemInfo = self._transform_grounded_plan()
@@ -33,6 +42,19 @@ class ProblemModifier(ABC):
         """create object from domain and problem files"""
         problem = read_problem_from_file(domain_filepath, problem_filepath)
         return cls(problem)
+
+
+    @classmethod
+    def from_text(cls, domain_string: str, problem_string: str):
+        """create object from domain and problem files"""
+        problem = read_problem_from_text(domain_string, problem_string)
+        return cls(problem)
+
+    @classmethod
+    def from_text_eval(cls, domain_string: str, problem_string: str):
+        """create object from domain and problem files"""
+        problem = read_problem_from_text(domain_string, problem_string)
+        return cls(problem, is_grounded=True)
 
     @abstractmethod
     def _transform_grounded_plan(self) -> ModifiedProblemInfo:
