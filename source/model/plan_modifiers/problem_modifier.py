@@ -2,7 +2,7 @@
 from abc import ABC, abstractmethod
 from typing import Callable
 from unified_planning.model import Problem #type: ignore
-from unified_planning.shortcuts import OneshotPlanner, OptimalityGuarantee, InstantaneousAction, Fluent #type: ignore
+from unified_planning.shortcuts import OneshotPlanner, InstantaneousAction, Fluent #type: ignore
 from unified_planning.engines.results import CompilerResult, PlanGenerationResult, PlanGenerationResultStatus #type: ignore
 from source.model.plan_modifiers.modifier_util import (
     read_problem_from_file, ground_problem, calculate_total_action_cost_metric, cost_leaving_precondition, read_problem_from_text)
@@ -32,6 +32,7 @@ class ProblemModifier(ABC):
         self.cost_mapping: dict[str, int] = mapping
         #create altered plan
         self.modified_problem_info: ModifiedProblemInfo = self._transform_grounded_plan()
+        print(self.modified_problem_info.problem)
         #create object for plan solving
         self.plan_info: ModifiedPlanInformation | None = None
         #create object for plan verification
@@ -64,8 +65,8 @@ class ProblemModifier(ABC):
     def try_solving_plan(self) -> None:
         """use a planner to solve and backtrack on the modified problem """
         #Solve modified Plan
-        planer = OneshotPlanner(name="fast-downward")
-        plan_results: PlanGenerationResult = planer.solve(self.modified_problem_info.problem, OptimalityGuarantee.SOLVED_OPTIMALLY)
+        planer = OneshotPlanner(name="pyperplan-opt")
+        plan_results: PlanGenerationResult = planer.solve(self.modified_problem_info.problem)
 
         backtracked_grounded_plan_with_left_preconditions: list[InstantaneousAction] = []
         left_preconditions: dict[str, list[Fluent]] = dict[str, list[Fluent]]()

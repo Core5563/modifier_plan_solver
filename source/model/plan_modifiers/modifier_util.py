@@ -1,7 +1,7 @@
 """import for reading in files"""
 from unified_planning.io import PDDLReader #type: ignore
 from unified_planning.model import Problem #type: ignore
-from unified_planning.shortcuts import Compiler, CompilationKind, OneshotPlanner #type: ignore
+from unified_planning.shortcuts import Compiler, CompilationKind, OneshotPlanner, Action #type: ignore
 from unified_planning.engines.results import CompilerResult, PlanGenerationResult #type: ignore
 from unified_planning.model.metrics import MinimizeActionCosts #type: ignore
 
@@ -51,6 +51,7 @@ def calculate_total_action_cost_metric(problem: Problem) -> tuple[int, dict[str,
     action_cost_metric: MinimizeActionCosts = MinimizeActionCosts({})
     action_cost_mapping = dict[str, int]()
 
+    
     # check if action cost metric is there
     if problem.quality_metrics is not None:
         for metric in problem.quality_metrics:
@@ -62,24 +63,22 @@ def calculate_total_action_cost_metric(problem: Problem) -> tuple[int, dict[str,
     for action in problem.actions:
         # increase actions by amount if action cost is set
         # otherwise all actions are set to a cost of 1
-        if has_action_cost_metric:
-
-            # check if mapping is there and if not check if default can be used
-            action_cost: int = 0
-            if action_cost_metric.get_action_cost(action) is not None:
-                action_cost = int(str(action_cost_metric.get_action_cost(action)))
-            else:
-                if action_cost_metric.default is not None:
-                    action_cost = action_cost_metric.default
-            action_cost_mapping[action.name] = action_cost
-            total_cost += action_cost
-        else:
-            action_cost_mapping[action.name] = 1
-            total_cost += 1
+        action_cost: int = retrieve_cost(action, action_cost_metric) if has_action_cost_metric else 1
+        action_cost_mapping[action.name] = action_cost
+        total_cost += action_cost
     return total_cost, action_cost_mapping
+
+def retrieve_cost(action: Action, metric: MinimizeActionCosts) -> int:
+    """find the corresponding cost by action name, if not found returns the default"""
+    for current_action, cost in metric.costs.items():
+        if current_action.name == action.name:
+            return cost.constant_value()
+    if metric.default.constant_value() < 1:
+        return 1
+    return metric.default.constant_value()
 
 
 def cost_leaving_precondition(problem: Problem) -> int:
     """calculate cost for leaving one precondition"""
     total_action_cost, mapping = calculate_total_action_cost_metric(problem)
-    return total_action_cost * len(mapping)
+    return int(total_action_cost * len(mapping))

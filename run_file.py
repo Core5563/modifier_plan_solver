@@ -579,6 +579,9 @@ def run_test_eval():
     # goal
     problem.add_goal(p)
     problem.add_goal(q)
+    problem.add_quality_metric(MinimizeActionCosts({problem.action("action1"): 1, problem.action("action2"): 1}, default=1))
+
+    print(problem)
     writer = PDDLWriter(problem)
 
     db_handler.insert_into_original_problems("1","1",2,0)
