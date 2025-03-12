@@ -8,6 +8,7 @@ from source.model.plan_modifiers.modifier_util import (
     read_problem_from_file, ground_problem, calculate_total_action_cost_metric, cost_leaving_precondition, read_problem_from_text)
 from source.model.plan_modifiers.modified_plan import ModifiedProblemInfo, ModifiedPlanInformation
 from source.model.plan_modifiers.modified_plan_validator import ModifiedPlanValidator
+from source.utility.transform_grounded import transform_grounded_problem_to_standard
 
 
 class ProblemModifier(ABC):
@@ -16,7 +17,6 @@ class ProblemModifier(ABC):
         #remember original problem
         self.original_problem: Problem = problem
 
-
         #ground the problem
         self.grounded_problem: Problem = Problem()
         if is_grounded:
@@ -24,7 +24,7 @@ class ProblemModifier(ABC):
         else:
             self.grounded_information: CompilerResult = ground_problem(problem)
             self.grounded_problem = self.grounded_information.problem
-
+        self.grounded_problem = transform_grounded_problem_to_standard(self.grounded_problem)
 
         #calculate and assign cost information
         _ , mapping = calculate_total_action_cost_metric(self.grounded_problem)
@@ -64,17 +64,14 @@ class ProblemModifier(ABC):
     def try_solving_plan(self) -> None:
         """use a planner to solve and backtrack on the modified problem """
         #Solve modified Plan
-        planer = OneshotPlanner(
-            problem_kind=self.modified_problem_info.problem.kind,
-            optimality_guarantee=OptimalityGuarantee.SOLVED_OPTIMALLY)
-        plan_results: PlanGenerationResult = planer.solve(self.modified_problem_info.problem)
+        planer = OneshotPlanner(name="fast-downward")
+        plan_results: PlanGenerationResult = planer.solve(self.modified_problem_info.problem, OptimalityGuarantee.SOLVED_OPTIMALLY)
 
         backtracked_grounded_plan_with_left_preconditions: list[InstantaneousAction] = []
-        left_preconditions: dict[str, tuple[InstantaneousAction, list[Fluent]]] = (
-            dict[str, tuple[InstantaneousAction, list[Fluent]]]())
+        left_preconditions: dict[str, list[Fluent]] = dict[str, list[Fluent]]()
 
         #create backtrack to plan if solvable
-        if plan_results.status == PlanGenerationResultStatus.SOLVED_OPTIMALLY:
+        if plan_results.status == PlanGenerationResultStatus.SOLVED_OPTIMALLY or plan_results.status == PlanGenerationResultStatus.SOLVED_SATISFICING:
             for action_instance in plan_results.plan.actions:
                 if action_instance.action.name in self.modified_problem_info.action_to_left_precondition_mapping:
                     original_grounded_action, list_of_left_preconditions = self.modified_problem_info.action_to_left_precondition_mapping[action_instance.action.name]

@@ -39,10 +39,10 @@ CREATE TABLE results (
     resultID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     destroyedProblemID INTEGER NOT NULL,
     modifierVersionID INTEGER NOT NULL,
-    timeInMilliseconds INTEGER NULL,
+    timeInMilliseconds INTEGER,
     errorText TEXT,
     FOREIGN KEY (destroyedProblemID) REFERENCES destroyed_problems(destroyedProblemID),
-    FOREIGN KEY (modifierVersionID) REFERENCES modifiers(modifierVersionID),
+    FOREIGN KEY (modifierVersionID) REFERENCES modifiers(modifierVersionID)
 );
 
 CREATE TABLE left_preconditions_results(

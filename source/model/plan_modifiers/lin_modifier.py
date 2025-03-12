@@ -26,6 +26,8 @@ class LinModifier(ProblemModifier):
         problem: Problem = self.grounded_problem
         modified_problem = problem.clone()
 
+        #print(self.grounded_problem)
+
         #altered problem is saturated with new actions
         modified_problem.clear_actions()
 
@@ -44,8 +46,14 @@ class LinModifier(ProblemModifier):
         negative_effect_mapping: dict[str, tuple[Fluent, list[InstantaneousAction]]] = (
             dict[str, tuple[Fluent, list[InstantaneousAction]]]())
 
+        
+        for action in problem.actions:
+            instant_action: InstantaneousAction = action
+            for precon in instant_action.preconditions:
+                precon_to_changed_precon[str(precon)] = (precon, [])
+
+        
         for fluent in problem.fluents:
-            precon_to_changed_precon[str(fluent.name)] = (fluent, [])
             negative_effect_mapping[str(fluent.name)] = (fluent, [])
 
         for action in problem.actions:
@@ -113,7 +121,7 @@ def create_resulting_actions(
     #check if negative effects in action
     for effect in original_action.effects:
         if not effect.value:
-            _ , list_of_negative_precondition_actions = negative_effect_mapping[str(effect.fluent)]
+            _ , list_of_negative_precondition_actions = negative_effect_mapping[str(effect)]
             list_of_negative_precondition_actions.append(exit_action)
 
     for current_precondition in original_action.preconditions:

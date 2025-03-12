@@ -17,7 +17,8 @@ from source.utility.directory_scanner import DirectoryScanner
 from source.utility.db_handler import DBHandler
 from source.utility.problem_destroyer import ProblemDestroyer
 from source.utility.file_util import remove_file
-
+from source.utility.evaluation import eval_all
+from source.utility.transform_grounded import transform_grounded_problem_to_standard
 
 
 def runReadInFromFile():
@@ -533,6 +534,87 @@ def run_mutate():
     smth = queue.get()
     print(smth.a)
 
+def run_test_eval():
+    #remove file first
+    db_file = "some_db_file.db"
+    try:
+        os.remove(db_file)
+    except FileNotFoundError:
+        #ignore if file does not exist
+        pass
+
+    db_handler = DBHandler(db_file)
+
+    db_handler.initialize_db()
+
+    #insert some problem into db
+    problem = unified_planning.shortcuts.Problem()
+    # atoms
+    x = unified_planning.shortcuts.Fluent("x", unified_planning.shortcuts.BoolType())
+    y = unified_planning.shortcuts.Fluent("y", unified_planning.shortcuts.BoolType())
+    z = unified_planning.shortcuts.Fluent("z", unified_planning.shortcuts.BoolType())
+    p = unified_planning.shortcuts.Fluent("p", unified_planning.shortcuts.BoolType())
+    q = unified_planning.shortcuts.Fluent("q", unified_planning.shortcuts.BoolType())
+    # define actions
+    action1 = unified_planning.shortcuts.InstantaneousAction("action1")
+    action1.add_precondition(x)
+    action1.add_precondition(y)
+    action1.add_effect(x, False)
+    action1.add_effect(y, False)
+    action1.add_effect(z, True)
+    action1.add_effect(p, True)
+    action2 = unified_planning.shortcuts.InstantaneousAction("action2")
+    action2.add_precondition(z)
+    action2.add_effect(z, False)
+    action2.add_effect(q, True)
+    # add actions
+    problem.add_action(action1)
+    problem.add_action(action2)
+    # initial values
+    problem.add_fluent(x, default_initial_value=True)
+    problem.add_fluent(y, default_initial_value=False)
+    problem.add_fluent(z, default_initial_value=False)
+    problem.add_fluent(p, default_initial_value=False)
+    problem.add_fluent(q, default_initial_value=False)
+    # goal
+    problem.add_goal(p)
+    problem.add_goal(q)
+    writer = PDDLWriter(problem)
+
+    db_handler.insert_into_original_problems("1","1",2,0)
+    original_id = db_handler.find_corresponding_original_problem_id("1","1")
+    db_handler.insert_destroy_problems(original_id,"", "", writer.get_problem(), writer.get_domain())
+    db_handler.insert_into_added_preconditions(original_id, "action1", "y")
+    db_handler.close()
+    
+    #evaluate all
+    eval_all(db_file)
+
+    db_handler = DBHandler(db_file)
+    #for (d_id, d_dom, d_prob) in db_handler.get_working_destroyed_problems():
+    #    
+    #    reader = PDDLReader()
+    #    problem: Problem = reader.parse_problem_string(d_dom, d_prob)
+    #    print(problem)
+    #    print(transform_grounded_problem_to_standard(problem))
+    
+    print(db_handler.get_all_from_results())
+    print(db_handler.get_all_left_preconditions_results())
+
+    try:
+        os.remove(db_file)
+    except FileNotFoundError:
+        #ignore if file does not exist
+        pass
+
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
     # readInWithActionCost()
     # instantiatePlanModifier()
@@ -549,7 +631,8 @@ if __name__ == '__main__':
     #run_db_handler()
     #time_calc()
     #run_exception_fluent()
-    run_mutate()
+    #run_mutate()
+    run_test_eval()
 
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
@@ -564,3 +647,4 @@ if __name__ == '__main__':
 
     #run_export_db()
     pass
+

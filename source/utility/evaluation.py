@@ -17,22 +17,24 @@ def eval_all(db_file: str) -> None:
         #exp modifier
         if not db_handler.is_result_already_in_database(destroyed_problem_id, exp_modifier_id):
             try:
-                modifier = ExpModifier.from_text(domain_content, problem_content)
+                modifier = ExpModifier.from_text_eval(domain_content, problem_content)
                 eval_single(modifier, exp_modifier_id, destroyed_problem_id, db_handler)
             except Exception:
                 error_text = traceback.format_exc()
+                print(error_text)
                 db_handler.insert_into_results(destroyed_problem_id, exp_modifier_id, None, error_text)
     
         #lin modifier
-        if not db_handler.is_result_already_in_database(destroyed_problem_id, exp_modifier_id):
+        if not db_handler.is_result_already_in_database(destroyed_problem_id, lin_modifier_id):
             try:
-                modifier = LinModifier.from_text(domain_content, problem_content)
-                eval_single(destroyed_problem_id, lin_modifier_id, destroyed_problem_id, db_handler)
+                modifier = LinModifier.from_text_eval(domain_content, problem_content)
+                eval_single(modifier, lin_modifier_id, destroyed_problem_id, db_handler)
             except Exception:
                 error_text = traceback.format_exc()
+                print(error_text)
                 db_handler.insert_into_results(destroyed_problem_id, lin_modifier_id, None, error_text)
+    db_handler.close()
 
-    
 
 def eval_single(modifier:ProblemModifier, modifier_id: int, destroyed_problem_id: int, db_handler: DBHandler) -> None:
     """evaluate one single destroyed_problem for exponential problem modifier"""
@@ -64,17 +66,21 @@ def eval_single(modifier:ProblemModifier, modifier_id: int, destroyed_problem_id
         error_text = return_error_dict[0]
         print("found error while solving")
         print(error_text)
-        db_handler.insert_into_results(destroyed_problem_id)
+        db_handler.insert_into_results(destroyed_problem_id, modifier_id, None, error_text)
         return
 
     start = return_time_dict[0]
     end = return_time_dict[1]
     time_in_milliseconds: int = int((end  - start) // 10 ** 6)
-    #todo insert results
     
     modifier: ProblemModifier = queue_modifier.get()
-    result_id: int = db_handler.find_corresponding_result_id(destroyed_problem_id, modifier_id)
+    print(modifier.modified_problem_info.action_to_left_precondition_mapping)
+    print(modifier.plan_info.backtracked_grounded_plan_result)
+    print(modifier.plan_info.plan_results)
+
     db_handler.insert_into_results(destroyed_problem_id, modifier_id, time_in_milliseconds, None)
-    for (action_name, (action_instance, precon_fnode_list)) in modifier.plan_info.left_preconditions.items():
+    result_id: int = db_handler.find_corresponding_result_id(destroyed_problem_id, modifier_id)
+    print(modifier.plan_info.left_preconditions)
+    for action_name, precon_fnode_list  in modifier.plan_info.left_preconditions.items():
         for precon in precon_fnode_list:
-            db_handler.insert_into_left_preconditions_results(result_id, action_name,str(precon))
+            db_handler.insert_into_left_preconditions_results(result_id, action_name, str(precon))

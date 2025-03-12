@@ -87,8 +87,8 @@ class DBHandler:
     def is_result_already_in_database(self, destroyed_problem_id: int, modifier_id: int) -> bool:
         """returns if the result is already in the database"""
         self.curs.execute("SELECT * FROM results WHERE " +
-            "destroyedProblemID=\"" + destroyed_problem_id + "\" " +
-            "AND modifierVersionID=\"" + modifier_id + "\""
+            "destroyedProblemID=\"" + str(destroyed_problem_id) + "\" " +
+            "AND modifierVersionID=\"" + str(modifier_id) + "\""
         )
         result = self.curs.fetchone()
 

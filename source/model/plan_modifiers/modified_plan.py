@@ -21,7 +21,7 @@ class ModifiedPlanInformation():
     def __init__(
             self,
             plan_results: PlanGenerationResult,
-            left_preconditions: dict[str, tuple[InstantaneousAction, list[FNode]]],
+            left_preconditions: dict[str, list[FNode]],
             backtracked_grounded_plan_result: list[InstantaneousAction]):
         #result from planner
         self.plan_results: PlanGenerationResult = plan_results

@@ -11,8 +11,10 @@ class ExpModifier(ProblemModifier):
 
     def _transform_grounded_plan(self) -> ModifiedProblemInfo:
         #clone the problem
-        problem: Problem = self.grounded_problem 
+        problem: Problem = self.grounded_problem
         modified_problem = problem.clone()
+
+        #print(self.grounded_problem)
 
         #altered problem is saturated with new actions
         modified_problem.clear_actions()
@@ -198,7 +200,6 @@ def create_resulting_actions(
 
     #go through all possible permutations
     while not all_preconditions_seen:
-
         #create actions for this iteration of permutation
         entry_action, exit_action = create_actions_according_to_permutation(
             precondition_permutation,
