@@ -26,8 +26,6 @@ class LinModifier(ProblemModifier):
         problem: Problem = self.grounded_problem
         modified_problem = problem.clone()
 
-        #print(self.grounded_problem)
-
         #altered problem is saturated with new actions
         modified_problem.clear_actions()
 

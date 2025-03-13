@@ -1,5 +1,5 @@
 """an Plan validator"""
-from unified_planning.shortcuts import Problem, InstantaneousAction, Fluent, PlanValidator #type: ignore
+from unified_planning.shortcuts import Problem, InstantaneousAction, FNode, PlanValidator #type: ignore
 from unified_planning.plans import ActionInstance, SequentialPlan #type: ignore
 from unified_planning.engines import ValidationResult #type: ignore
 from source.model.plan_modifiers.modified_plan import ModifiedPlanInformation, ModifiedProblemInfo
@@ -12,8 +12,8 @@ class ModifiedPlanValidator:
         #alter the verification problem according to the left preconditions
         verification_problem = grounded_problem.clone()
 
-        left_precon_mapping: dict[str, tuple[InstantaneousAction, list[Fluent]]] = modified_problem.action_to_left_precondition_mapping
-        for _ , (action, list_of_left_precon_fluents) in left_precon_mapping.items():
+        left_precon_mapping: dict[str, tuple[InstantaneousAction, list[FNode]]] = modified_problem.action_to_left_precondition_mapping
+        for _ , (action, list_of_left_precon_fnodes) in left_precon_mapping.items():
             current_action: InstantaneousAction = action
 
             #get corresponding action in verify problem
@@ -22,13 +22,13 @@ class ModifiedPlanValidator:
             #clear preconditions
             to_modify_action.clear_preconditions()
 
-            list_of_left_precon_names = [precon.name for precon in list_of_left_precon_fluents]
+            list_of_left_precon_names = [str(precon) for precon in list_of_left_precon_fnodes]
 
             #no name into all of that
             for precondition in current_action.preconditions:
                 #add precondition if not in the left preconditions list
-                if not (precondition.fluent().name in list_of_left_precon_names):
-                    to_modify_action.add_precondition(verification_problem.fluent(precondition.fluent().name))
+                if not (precondition in list_of_left_precon_names):
+                    to_modify_action.add_precondition(precondition)
 
         #make a sequential plan to verify
         action_instance_list: list[ActionInstance] = []

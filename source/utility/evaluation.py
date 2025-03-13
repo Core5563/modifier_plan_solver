@@ -74,13 +74,10 @@ def eval_single(modifier:ProblemModifier, modifier_id: int, destroyed_problem_id
     time_in_milliseconds: int = int((end  - start) // 10 ** 6)
     
     modifier: ProblemModifier = queue_modifier.get()
-    #print(modifier.modified_problem_info.action_to_left_precondition_mapping)
-    #print(modifier.plan_info.backtracked_grounded_plan_result)
-    print(modifier.plan_info.plan_results)
 
     db_handler.insert_into_results(destroyed_problem_id, modifier_id, time_in_milliseconds, None)
     result_id: int = db_handler.find_corresponding_result_id(destroyed_problem_id, modifier_id)
-    #print(modifier.plan_info.left_preconditions)
+
     for action_name, precon_fnode_list  in modifier.plan_info.left_preconditions.items():
         for precon in precon_fnode_list:
             db_handler.insert_into_left_preconditions_results(result_id, action_name, str(precon))

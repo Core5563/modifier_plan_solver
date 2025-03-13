@@ -42,3 +42,13 @@ def transform_grounded_problem_to_standard(problem: Problem) -> Problem:
             inst_action.add_precondition(precon)
 
     return return_problem
+
+def find_corresponding_action_in_left_preconditions(
+        action_name_transformed_grounded: str,
+        left_precon_mapping: dict[str, tuple[InstantaneousAction, list[FNode]]]) -> str:
+    """find the name corresponding to the given action and return it"""
+    for current_action_name in left_precon_mapping:
+        if(current_action_name.replace("-","_") == action_name_transformed_grounded):
+            return current_action_name
+    
+    raise ValueError("Could not find name")

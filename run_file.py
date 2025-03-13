@@ -581,7 +581,7 @@ def run_test_eval():
     problem.add_goal(q)
     problem.add_quality_metric(MinimizeActionCosts({problem.action("action1"): 1, problem.action("action2"): 1}, default=1))
 
-    print(problem)
+    #print(problem)
     writer = PDDLWriter(problem)
 
     db_handler.insert_into_original_problems("1","1",2,0)
@@ -609,13 +609,6 @@ def run_test_eval():
     except FileNotFoundError:
         #ignore if file does not exist
         pass
-
-
-
-
-
-
-
 
 
 if __name__ == '__main__':
@@ -650,4 +643,3 @@ if __name__ == '__main__':
 
     #run_export_db()
     pass
-

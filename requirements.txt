@@ -5,6 +5,6 @@
 unified-planning[Fast-Downward] >= 1.1.0
 unified-planning[ENHSP] >= 1.1.0
 #unified-planning[Tamer] >= 1.1.0
-unified-planning[Aries] >= 1.1.0
+#unified-planning[Aries] >= 1.1.0
 unified-planning[Pyperplan] >= 1.1.0
 pytest
