@@ -479,9 +479,10 @@ def docker_scan():
     print(db_handler.get_all_add_preconditions())
     db_handler.close()
 
-def docker_loock_into():
+def docker_look_into():
     #file_path = "evaluation/database/eval.db"
-    file_path = "evaluation/baseline_destroyed/eval.db"
+    #file_path = "evaluation/baseline_destroyed/eval.db"
+    file_path = "out/eval.db"
     db_handler = DBHandler(file_path)
     print(db_handler.get_all_original_problems())
     print("====================================")
@@ -507,8 +508,10 @@ def run_clear_destroy_problems():
     db_handler.close()
 
 def run_export_db():
-    db_file = 'evaluation/database/eval.db'
-    dump_file = 'evaluation/database/dump.sql'
+    #db_file = 'evaluation/database/eval.db'
+    db_file = 'out/eval.db'
+    #dump_file = 'evaluation/database/dump.sql'
+    dump_file = 'out/dump.sql'
     con = sqlite3.connect(db_file)
     with open(dump_file, 'w', encoding="utf-8") as f:
         for line in con.iterdump():
@@ -610,6 +613,20 @@ def run_test_eval():
         #ignore if file does not exist
         pass
 
+def run_import_db():
+    #remove file first
+    # try:
+    #     os.remove('evaluation/database/eval.db')
+    # except FileNotFoundError:
+    #     #ignore if file does not exist
+    #     pass
+    db_file = "out/OUTeval.db"
+    con = sqlite3.connect(db_file)
+    curs = con.cursor()
+    scriptdata: str= ""
+    with open("out/dump_execute.sql", mode="r", encoding="utf-8") as file:
+        scriptdata = file.read().rstrip()
+    curs.executescript(scriptdata)
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -628,13 +645,13 @@ if __name__ == '__main__':
     #time_calc()
     #run_exception_fluent()
     #run_mutate()
-    run_test_eval()
+    #run_test_eval()
 
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
     #docker_init()
     #docker_scan()
-    #docker_loock_into()
+    #docker_look_into()
 
 
 
@@ -642,4 +659,5 @@ if __name__ == '__main__':
     #run_problem_destroyer()
 
     #run_export_db()
+    #run_import_db()
     pass

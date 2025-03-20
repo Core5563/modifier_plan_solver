@@ -17,5 +17,6 @@ COPY run_destroy_problems.py ./run_destroy_problems.py
 #RUN useradd app
 #USER app
 
-#CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
-CMD ["python", "run_destroy_problems.py"]
+
+#CMD ["python", "run_destroy_problems.py"]
+CMD ["python", "run_evaluate.py"]
