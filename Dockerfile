@@ -11,6 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY source ./source
 COPY evaluation ./evaluation
 COPY run_destroy_problems.py ./run_destroy_problems.py
+COPY run_evaluate.py ./run_evaluate.py
 #EXPOSE 5000
 
 # Setup an app user so the container doesn't run as the root user
