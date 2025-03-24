@@ -11,6 +11,7 @@ from source.utility.multiprocess_tasks import solve_problem_with_multithreading,
 from source.utility.directory_scanner import DirectoryScanner, ProblemDomainSet
 from source.utility.db_handler import DBHandler
 from source.utility.plan_analyser import PlanAnalyser
+from source.utility.transform_grounded import transform_grounded_problem_to_standard
 
 class ProblemDestroyer:
     """Destroy Problems"""
@@ -157,6 +158,7 @@ class ProblemDestroyer:
                     error_text
                 )
     def destroy_problems(self):
+        """destroy all problems"""
         list_of_unused_problems = self.db_handler.get_not_used_original_problem_ids()
         for problem_tuple in list_of_unused_problems:
             original_problem_id = problem_tuple[0]
@@ -176,6 +178,7 @@ class ProblemDestroyer:
                     )
     
     def destroy_problem(self, original_problem_id):
+        """destroy each individual problem"""
         #load problem
         domain_path, problem_path, cost, time_in_milliseconds = self.db_handler.get_original_problem_from_id(original_problem_id)
             
@@ -235,7 +238,7 @@ class ProblemDestroyer:
         grounded_information = return_grounding_dict[0]
 
         #initalize problem to destroy
-        problem_to_destroy: Problem = grounded_information.problem.clone()
+        problem_to_destroy: Problem = transform_grounded_problem_to_standard(grounded_information.problem.clone())
         
         #print(problem_to_destroy)
         is_problem_solvable: bool = True
