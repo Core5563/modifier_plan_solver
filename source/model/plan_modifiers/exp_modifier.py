@@ -2,7 +2,7 @@
 from uuid import uuid4
 from unified_planning.shortcuts import Problem, InstantaneousAction, MinimizeActionCosts, Action, Fluent, BoolType, FNode #type: ignore
 from .problem_modifier import ProblemModifier
-from source.model.plan_modifiers.modified_plan import ModifiedProblemInfo
+from source.model.plan_modifiers.modified_plan import ModifiedProblemInfo #type: ignore
 
 class ExpModifier(ProblemModifier):
     """Plan Modifier actions are permuted according to its preconditions"""

@@ -35,7 +35,12 @@ def solve_problem_with_multithreading_and_time_calc(
 
 def ground_solvable_problem_multithread(problem: Problem, return_dict: dict[int, CompilerResult], error_dict: dict[int, str])-> None:
     """ground Problem with multithreading"""
-    to_return = ground_solvable_problem(problem)
+    try:
+        to_return = ground_solvable_problem(problem)
+    except Exception:
+        error_text = traceback.format_exc()
+        error_dict[0] = error_text
+        return
     return_dict[0] = to_return
 
 def modifier_solve_with_time(queue: Queue, return_time_dict: dict[int, int], return_error_dict: dict[int, str])-> None:

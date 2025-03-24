@@ -187,7 +187,53 @@ class ProblemDestroyer:
         loaded_problem = read_problem_from_file(domain_path, problem_path)
         
         #ground the problem
-        grounded_information = ground_solvable_problem(loaded_problem)
+        manager_error = Manager()
+        manager_result_ground = Manager()
+
+        return_grounding_dict: dict[int, CompilerResult] = manager_result_ground.dict()
+        return_error_dict: dict[int, str] = manager_error.dict()
+
+        #ground problem
+        time_to_wait_in_minutes_grounding = 30
+        process_grounding = Process(target=ground_solvable_problem_multithread, name="grounding", args=(loaded_problem, return_grounding_dict, return_error_dict))
+        print("start grounding problem")
+        process_grounding.start()
+        
+        #disregard process if it takes longer than the original process
+        process_grounding.join(time_to_wait_in_minutes_grounding * 60)
+        if process_grounding.is_alive():
+            process_grounding.terminate()
+            process_grounding.join()
+            print("grounding exceeded " + str(time_to_wait_in_minutes_grounding) + "minutes aborting.")
+            self.db_handler.insert_destroy_problems(
+                original_problem_id,
+                "",
+                "",
+                "",
+                "",
+                "grounding exceeded " + str(time_to_wait_in_minutes_grounding) + "minutes aborting."
+            )
+            return
+        
+        #if error occurred handle it
+        did_error_occuring_while_problem_grounding = 0 in return_error_dict
+        if did_error_occuring_while_problem_grounding:
+            print("error while grounding")
+            error_text = return_error_dict[0]
+            return_error_dict.pop(0)
+            print(error_text)
+            self.db_handler.insert_destroy_problems(
+                original_problem_id,
+                "",
+                "",
+                "",
+                "",
+                error_text
+            )
+            return
+
+        grounded_information = return_grounding_dict[0]
+
         #initalize problem to destroy
         problem_to_destroy: Problem = grounded_information.problem.clone()
         
@@ -256,8 +302,6 @@ class ProblemDestroyer:
                 [random_chosen_action_name] = random.choices(action_name_list, weights=action_weight_list, k=1)
                 current_action: InstantaneousAction = problem_to_destroy.action(random_chosen_action_name)
                 #check if precondition already exists
-                #todo:if random_chosen_fluent_name in [precon.fluent().name for precon in current_action.preconditions]:
-                #todo:    continue
                 if random_chosen_fluent_name in [str(precon)for precon in current_action.preconditions]:
                     continue
 
