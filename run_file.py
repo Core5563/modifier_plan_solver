@@ -495,6 +495,8 @@ def docker_look_into():
 
     print("====================================")
     print(db_handler.get_all_add_preconditions())
+    print("==========================")
+    print(db_handler.get_all_from_results())
 
 def run_clear_destroy_problems():
     #file_path = "evaluation/baseline_destroyed/eval.db"
@@ -651,7 +653,7 @@ if __name__ == '__main__':
     #comparison_problem_fluents()
     #docker_init()
     #docker_scan()
-    #docker_look_into()
+    docker_look_into()
 
 
 

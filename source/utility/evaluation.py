@@ -48,7 +48,7 @@ def eval_single(modifier:ProblemModifier, modifier_id: int, destroyed_problem_id
     process = Process(target=modifier_solve_with_time, name="try_solving", args=(queue_modifier, return_time_dict, return_error_dict))
     process.start()
     print("starting trying to solve problem")
-    time_to_wait_in_minutes = 60
+    time_to_wait_in_minutes = 120
 
     process.join(time_to_wait_in_minutes * 60)
     
