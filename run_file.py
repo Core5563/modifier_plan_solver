@@ -630,6 +630,22 @@ def run_import_db():
         scriptdata = file.read().rstrip()
     curs.executescript(scriptdata)
 
+def change_db():
+    db_file = "out/eval.db"
+    db_handler: DBHandler = DBHandler(db_file)
+    db_handler.run_command("DROP TABLE results")
+    command_string: str = "CREATE TABLE results (resultID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,destroyedProblemID INTEGER NOT NULL,modifierVersionID INTEGER NOT NULL,timeInMilliseconds INTEGER,errorText TEXT,FOREIGN KEY (destroyedProblemID) REFERENCES destroyed_problems(destroyedProblemID),FOREIGN KEY (modifierVersionID) REFERENCES modifiers(modifierVersionID))"
+    db_handler.run_command(command_string)
+    db_handler.close()
+
+
+def run_destroy_yourself():
+    db_file = "out/eval.db"
+    pd = ProblemDestroyer(db_file)
+    pd.load_all_problems()
+    pd.destroy_problems()
+
+
 if __name__ == '__main__':
     # readInWithActionCost()
     # instantiatePlanModifier()
@@ -648,14 +664,15 @@ if __name__ == '__main__':
     #run_exception_fluent()
     #run_mutate()
     #run_test_eval()
+    #change_db()
 
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
     #docker_init()
     #docker_scan()
-    docker_look_into()
+    #docker_look_into()
 
-
+    run_destroy_yourself()
 
     #run_clear_destroy_problems()
     #run_problem_destroyer()

@@ -210,3 +210,7 @@ class DBHandler:
         self.curs.execute("DELETE FROM added_preconditions")
         self.commit()
 
+    def run_command(self, command_string: str) -> None:
+        """run one command"""
+        self.curs.execute(command_string)
+        self.commit()
