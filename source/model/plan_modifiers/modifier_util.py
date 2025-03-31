@@ -82,4 +82,5 @@ def cost_leaving_precondition(problem: Problem) -> int:
     """calculate cost for leaving one precondition"""
     total_action_cost, mapping = calculate_total_action_cost_metric(problem)
     #return int(total_action_cost * len(mapping))
-    return int(total_action_cost)
+    #return int(total_action_cost)
+    return 1

@@ -482,7 +482,7 @@ def docker_scan():
 def docker_look_into():
     #file_path = "evaluation/database/eval.db"
     #file_path = "evaluation/baseline_destroyed/eval.db"
-    file_path = "out/eval.db"
+    file_path = "out/eval3.db"
     db_handler = DBHandler(file_path)
     print(db_handler.get_all_original_problems())
     print("====================================")
@@ -670,9 +670,9 @@ if __name__ == '__main__':
     #comparison_problem_fluents()
     #docker_init()
     #docker_scan()
-    #docker_look_into()
+    docker_look_into()
 
-    run_destroy_yourself()
+    #run_destroy_yourself()
 
     #run_clear_destroy_problems()
     #run_problem_destroyer()
