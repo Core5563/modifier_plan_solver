@@ -399,7 +399,7 @@ def some_unsolvable_example_with_basic_code():
 
 def run_directory_scan():
     dir_scanner = DirectoryScanner()
-    for result in dir_scanner.scan_benchmark('./evaluation/ipc2014_cleaned_benchmark'):
+    for result in dir_scanner.scan_benchmark_IPC2014('./evaluation/ipc2014_cleaned_benchmark'):
         print(result.domain_dir)
 
 def run_db_stuff():
@@ -456,7 +456,7 @@ def run_problem_destroyer():
     #handler.initialize_db()
     #handler.close()
     pd = ProblemDestroyer("evaluation/database/eval.db")
-    pd.load_all_problems()
+    pd.load_all_problems_IPC2014()
     pd.destroy_problems()
 
 def docker_init():
@@ -642,9 +642,16 @@ def change_db():
 def run_destroy_yourself():
     db_file = "out/eval.db"
     pd = ProblemDestroyer(db_file)
-    pd.load_all_problems()
+    pd.load_all_problems_IPC2014()
     pd.destroy_problems()
 
+def run_load_IPC2016():
+    loader = DirectoryScanner()
+    pre_path = "evaluation/ipc2016_benchmark"
+    res = loader.scan_benchmark_IPC2016(pre_path)
+    #res = loader.scan_benchmark_IPC2014("evaluation/ipc2014_cleaned_benchmark")
+    for r in res:
+        print("d: " + pre_path + r.domain_dir + " p: " + pre_path + r.problem_dir)
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -665,12 +672,15 @@ if __name__ == '__main__':
     #run_mutate()
     #run_test_eval()
     #change_db()
+    run_load_IPC2016()
+
+
 
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
     #docker_init()
     #docker_scan()
-    docker_look_into()
+    #docker_look_into()
 
     #run_destroy_yourself()
 

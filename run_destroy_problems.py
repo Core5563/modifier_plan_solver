@@ -13,7 +13,7 @@ def destroy_problems_to_use():
     #file= os.open("/var/persist/eval.db", flags=os.O_RDWR)
     #file.close()
     pd = ProblemDestroyer("/var/persist/eval.db")
-    pd.load_all_problems()
+    pd.load_all_problems_IPC2014()
     pd.destroy_problems()
     pd.close()
     handler = DBHandler("/var/persist/eval.db")

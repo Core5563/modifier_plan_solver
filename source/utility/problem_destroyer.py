@@ -19,12 +19,12 @@ class ProblemDestroyer:
     def __init__(self, database_file_name: str):
         #evaluation/easy_benchmark/subfolder1/subfolder2
         self.directory_scanner = DirectoryScanner()
-        self.problem_list: list[ProblemDomainSet] = self.directory_scanner.scan_benchmark("./evaluation/ipc2014_cleaned_benchmark")
+        self.problem_list: list[ProblemDomainSet] = self.directory_scanner.scan_benchmark_IPC2014("./evaluation/ipc2014_cleaned_benchmark")
         #self.directory_scanner.scan_benchmark("./evaluation/ipc2014_cleaned_benchmark")
         self.db_handler = DBHandler(database_file_name)
         self.plan_analyser = PlanAnalyser()
 
-    def load_all_problems(self):
+    def load_all_problems_IPC2014(self):
         """load all original problems into the database with time to solve and solution length"""
         pre_path = "evaluation/ipc2014_cleaned_benchmark/"
         #pre_path = "evaluation/easy_benchmark/"
