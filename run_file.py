@@ -19,6 +19,7 @@ from source.utility.problem_destroyer import ProblemDestroyer
 from source.utility.file_util import remove_file
 from source.utility.evaluation import eval_all
 from source.utility.transform_grounded import transform_grounded_problem_to_standard
+from source.utility.eval_ipc2016 import load_ipc206_problems_into_database
 
 
 def runReadInFromFile():
@@ -646,12 +647,12 @@ def run_destroy_yourself():
     pd.destroy_problems()
 
 def run_load_IPC2016():
-    loader = DirectoryScanner()
-    pre_path = "evaluation/ipc2016_benchmark"
-    res = loader.scan_benchmark_IPC2016(pre_path)
-    #res = loader.scan_benchmark_IPC2014("evaluation/ipc2014_cleaned_benchmark")
-    for r in res:
-        print("d: " + pre_path + r.domain_dir + " p: " + pre_path + r.problem_dir)
+    db_file = "out/evalIPC2016.db"
+    db_handler = DBHandler(db_file)
+    #db_handler.initialize_db()
+    db_handler.close()
+    load_ipc206_problems_into_database(db_file)
+
 
 if __name__ == '__main__':
     # readInWithActionCost()

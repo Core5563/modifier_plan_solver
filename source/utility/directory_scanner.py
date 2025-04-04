@@ -44,18 +44,27 @@ class DirectoryScanner:
             problem_dir = ""
             is_content_directory: bool = (len(files) != 0)
 
-            if is_content_directory:
-                #get domains
-                domains: list[str] = []
-                if "domain.pddl" in files:
-                    domains.append("domain.pddl")
-                else:
-                    domains= [filename for filename in files if re.search("^dom[0-9]*.pddl$", filename) is not None]
-                if len(domains) == 0:
-                    continue
-                problems: str = [filename for filename in files if re.search("^.*prob[0-9]*.pddl$", filename) is not None]
-                if len(problems) == 0:
-                    continue
+            if not is_content_directory:
+                continue
+
+            #get domains
+            domains: list[str] = []
+            if "domain.pddl" in files:
+                domains.append("domain.pddl")
+            else:
+                domains= [filename for filename in files if re.search("^dom[0-9]*.pddl$", filename) is not None]
+
+            #get problems                
+            if len(domains) == 0:
+                continue
+
+            problems: str = [filename for filename in files if re.search("^.*prob[0-9]*.pddl$", filename) is not None]
+
+            if len(problems) == 0:
+                continue
+
+            #if only one domain file -> pack all problems to the single domain
+            elif len(domains) == 1:
                 for domain_file_name in domains:
                     for problem_file_name in problems:
                         domain_file_path = root.replace(dir_path, "", 1)
@@ -63,4 +72,19 @@ class DirectoryScanner:
                         domain_full_path = domain_file_path + os.sep + domain_file_name
                         problem_full_path = problem_file_path + os.sep + problem_file_name
                         content_list.append(ProblemDomainSet(domain_full_path, problem_full_path))
+                continue
+            
+            #find corresponding domain files to problem files
+            for problem_file_name in problems:
+                dom_file = "dom" + (problem_file_name.replace("satprob", "")).replace("prob", "")
+                if dom_file not in domains:
+                    continue
+                domain_file_path = root.replace(dir_path, "", 1)
+                problem_file_path = root.replace(dir_path, "", 1)
+                domain_full_path = domain_file_path + os.sep + dom_file
+                problem_full_path = problem_file_path + os.sep + problem_file_name
+                content_list.append(ProblemDomainSet(domain_full_path, problem_full_path))
+
+
+                
         return content_list

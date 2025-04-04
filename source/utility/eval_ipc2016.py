@@ -10,7 +10,7 @@ from source.utility.db_handler import DBHandler
 from source.model.plan_modifiers.modifier_util import read_problem_from_file
 from source.utility.transform_grounded import transform_grounded_problem_to_standard
 
-def load_problems_into_database(db_file: str) -> None:
+def load_ipc206_problems_into_database(db_file: str) -> None:
     """load all problems into db"""
     db_handler = DBHandler(db_file)
     scanner = DirectoryScanner()
@@ -19,6 +19,12 @@ def load_problems_into_database(db_file: str) -> None:
     for relative_domain_problem_path in scanner_result:
         problem_path = pre_path + relative_domain_problem_path.problem_dir
         domain_path = pre_path + relative_domain_problem_path.domain_dir
+        print("d: " + domain_path + " p: " + problem_path)
+        is_already_in_db: bool = db_handler.is_original_problem_in_database(problem_path, domain_path)
+        if is_already_in_db:
+            print("already in db")
+            continue
+        
         db_handler.insert_into_original_problems(
             problem_path,
             domain_path,
@@ -30,7 +36,7 @@ def load_problems_into_database(db_file: str) -> None:
             load_and_ground_problem(problem_id, domain_path, problem_path, db_handler)
         except Exception:
             error_text = traceback.format_exc()
-            print(problem_path + "\n" + error_text)
+            print(error_text)
             db_handler.insert_into_original_problems(
                 problem_path,
                 domain_path,
@@ -91,6 +97,7 @@ def load_and_ground_problem(original_problem_id: int, domain_path: str, problem_
         )
         return
 
+    print("grounding succeeded")
     grounded_information = return_grounding_dict[0]
 
     #initialize problem to destroy
@@ -98,6 +105,7 @@ def load_and_ground_problem(original_problem_id: int, domain_path: str, problem_
     writer = PDDLWriter(grounded_standardized_problem)
     problem_content: str = writer.get_problem()
     domain_content: str = writer.get_domain()
+    print("insert contents into db")
     db_handler.insert_destroy_problems(
         original_problem_id,
         "",
