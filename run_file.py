@@ -400,7 +400,7 @@ def some_unsolvable_example_with_basic_code():
 
 def run_directory_scan():
     dir_scanner = DirectoryScanner()
-    for result in dir_scanner.scan_benchmark_IPC2014('./evaluation/ipc2014_cleaned_benchmark'):
+    for result in dir_scanner.scan_benchmark('./evaluation/ipc2014_cleaned_benchmark'):
         print(result.domain_dir)
 
 def run_db_stuff():
@@ -483,7 +483,8 @@ def docker_scan():
 def docker_look_into():
     #file_path = "evaluation/database/eval.db"
     #file_path = "evaluation/baseline_destroyed/eval.db"
-    file_path = "out/eval3.db"
+    #file_path = "out/evalCequals1.db"
+    file_path = "tempEval.db"
     db_handler = DBHandler(file_path)
     print(db_handler.get_all_original_problems())
     print("====================================")
@@ -498,6 +499,7 @@ def docker_look_into():
     print(db_handler.get_all_add_preconditions())
     print("==========================")
     print(db_handler.get_all_from_results())
+    print(db_handler.get_all_left_preconditions_results())
 
 def run_clear_destroy_problems():
     #file_path = "evaluation/baseline_destroyed/eval.db"
@@ -641,9 +643,16 @@ def change_db():
 
 
 def run_destroy_yourself():
-    db_file = "out/eval.db"
+    #db_file = "out/eval.db"
+    db_file = "tempEval.db"
+
+    #db_handler = DBHandler(db_file)
+    #db_handler.initialize_db()
+    #db_handler.close()
+
     pd = ProblemDestroyer(db_file)
-    pd.load_all_problems_IPC2014()
+    #pd.load_all_problems_IPC2014()
+    pd.load_all_problems_easy_benchmark()
     pd.destroy_problems()
 
 def run_load_IPC2016():
@@ -653,6 +662,15 @@ def run_load_IPC2016():
     db_handler.close()
     load_ipc206_problems_into_database(db_file)
 
+def run_eval_all():
+    #db_file = "persist/eval.db"
+    db_file = "tempEval.db"
+    eval_all(db_file)
+
+
+def create_handcrafted_problems():
+    dir_path = "out/handcrafted"
+    ProblemCreator.create_simple_problems(dir_path)
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -670,10 +688,13 @@ if __name__ == '__main__':
     #run_db_handler()
     #time_calc()
     #run_exception_fluent()
+    #create_handcrafted_problems()
+
     #run_mutate()
     #run_test_eval()
     #change_db()
-    run_load_IPC2016()
+    
+    #run_load_IPC2016()
 
 
 
@@ -681,9 +702,11 @@ if __name__ == '__main__':
     #comparison_problem_fluents()
     #docker_init()
     #docker_scan()
-    #docker_look_into()
+    run_destroy_yourself()
+    run_eval_all()
+    docker_look_into()
 
-    #run_destroy_yourself()
+    
 
     #run_clear_destroy_problems()
     #run_problem_destroyer()

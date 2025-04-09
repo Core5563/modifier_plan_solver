@@ -12,7 +12,7 @@ class DirectoryScanner:
     def __init__(self):
         pass
 
-    def scan_benchmark_IPC2014(self, dir_path: str) -> list[ProblemDomainSet]:
+    def scan_benchmark(self, dir_path: str) -> list[ProblemDomainSet]:
         """scan files"""
         content_list: list[ProblemDomainSet] = []
         for root, _ , files in os.walk(dir_path):

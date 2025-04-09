@@ -93,8 +93,7 @@ def load_and_ground_problem(original_problem_id: int, domain_path: str, problem_
             "",
             "",
             "",
-            error_text
-        )
+            error_text)
         return
 
     print("grounding succeeded")

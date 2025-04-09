@@ -19,20 +19,19 @@ class ProblemDestroyer:
     def __init__(self, database_file_name: str):
         #evaluation/easy_benchmark/subfolder1/subfolder2
         self.directory_scanner = DirectoryScanner()
-        self.problem_list: list[ProblemDomainSet] = self.directory_scanner.scan_benchmark_IPC2014("./evaluation/ipc2014_cleaned_benchmark")
+        self.problem_list: list[ProblemDomainSet] = []
         #self.directory_scanner.scan_benchmark("./evaluation/ipc2014_cleaned_benchmark")
         self.db_handler = DBHandler(database_file_name)
         self.plan_analyser = PlanAnalyser()
+        self.pre_path: str = ""
 
-    def load_all_problems_IPC2014(self):
-        """load all original problems into the database with time to solve and solution length"""
-        pre_path = "evaluation/ipc2014_cleaned_benchmark/"
-        #pre_path = "evaluation/easy_benchmark/"
-        #current_problem = self.problem_list[0]
+    def load_all_problems(self):
+        """load all problems into the database"""
+        self.problem_list = self.directory_scanner.scan_benchmark(self.pre_path)
         for current_problem in self.problem_list:
             #load problem
-            domain_path: str = pre_path + current_problem.domain_dir
-            problem_path: str = pre_path + current_problem.problem_dir
+            domain_path: str = self.pre_path + current_problem.domain_dir
+            problem_path: str = self.pre_path + current_problem.problem_dir
             print("start loading problem d: " + domain_path + " p: " + problem_path)
             try:
                 #if already loaded in continue
@@ -157,9 +156,27 @@ class ProblemDestroyer:
                     0,
                     error_text
                 )
+
+    def load_all_problems_easy_benchmark(self):
+        """load dummy benchmark"""
+        self.pre_path = "evaluation/easy_benchmark/"
+        self.load_all_problems()
+
+    def load_all_problems_simple_benchmark(self):
+        """load handcrafted benchmark"""
+        self.pre_path = "evaluation/simple_benchmark/"
+        self.load_all_problems()
+
+    def load_all_problems_IPC2014(self):
+        """load all original problems into the database with time to solve and solution length"""
+        self.pre_path = "evaluation/ipc2014_cleaned_benchmark/"
+        self.directory_scanner.scan_benchmark(self.pre_path)
+        self.load_all_problems()
+        
     def destroy_problems(self):
         """destroy all problems"""
         list_of_unused_problems = self.db_handler.get_not_used_original_problem_ids()
+        print(list_of_unused_problems)
         for problem_tuple in list_of_unused_problems:
             original_problem_id = problem_tuple[0]
             print("problem analyzing for " + str(original_problem_id))

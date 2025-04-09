@@ -1,10 +1,60 @@
 import traceback
+from os.path import isfile
 from multiprocessing import Process, Manager, Queue
+from unified_planning.io import PDDLWriter
 from source.utility.db_handler import DBHandler
 from source.utility.multiprocess_tasks import modifier_solve_with_time
 from source.model.plan_modifiers.problem_modifier import ProblemModifier
 from source.model.plan_modifiers.exp_modifier import ExpModifier
 from source.model.plan_modifiers.lin_modifier import LinModifier
+
+def write_out_problems(db_file: str) -> None:
+    """write out the problems"""
+    db_handler: DBHandler = DBHandler(db_file)
+    exp_modifier_id = 1
+    lin_modifier_id = 2
+    destroyed_problem_list: list[tuple[int, str, str]] = db_handler.get_working_destroyed_problems()
+    for (destroyed_problem_id, domain_content, problem_content) in destroyed_problem_list:
+        content_dir = "out"
+        #exp modifier
+        if not db_handler.is_result_already_in_database(destroyed_problem_id, exp_modifier_id):
+            try:
+                dom_file = content_dir + "/" + "domainExp" + str(destroyed_problem_id) + ".pddl"
+                prob_file = content_dir + "/" + "problemExp" + str(destroyed_problem_id) + ".pddl"
+                if not isfile(dom_file):
+                    modifier = ExpModifier.from_text_eval(domain_content, problem_content)
+                    writer = PDDLWriter(modifier.modified_problem_info.problem)
+                    writer.write_domain(dom_file)
+                    writer.write_problem(prob_file)
+                    print("written EXP")
+                else:
+                    print(dom_file + " already exists")
+                #eval_single(modifier, exp_modifier_id, destroyed_problem_id, db_handler)
+            except Exception:
+                error_text = traceback.format_exc()
+                print(error_text)
+                #db_handler.insert_into_results(destroyed_problem_id, exp_modifier_id, None, error_text)
+    
+        #lin modifier
+        if not db_handler.is_result_already_in_database(destroyed_problem_id, lin_modifier_id):
+            try:
+                dom_file = content_dir + "/" + "domainLin" + str(destroyed_problem_id) + ".pddl"
+                prob_file = content_dir + "/" + "problemLin" + str(destroyed_problem_id) + ".pddl"
+                if not isfile(dom_file):
+                    modifier = LinModifier.from_text_eval(domain_content, problem_content)
+                    writer = PDDLWriter(modifier.modified_problem_info.problem)
+                    writer.write_domain(dom_file)
+                    writer.write_problem(prob_file)
+                    print("written LIN")
+                else:
+                    print(dom_file + " already exists")
+                #eval_single(modifier, lin_modifier_id, destroyed_problem_id, db_handler)
+            except Exception:
+                error_text = traceback.format_exc()
+                print(error_text)
+                #db_handler.insert_into_results(destroyed_problem_id, lin_modifier_id, None, error_text)
+    db_handler.close()
+
 
 def eval_all(db_file: str) -> None:
     """evaluate all destroyed problems"""
@@ -13,7 +63,6 @@ def eval_all(db_file: str) -> None:
     lin_modifier_id = 2
     destroyed_problem_list: list[tuple[int, str, str]] = db_handler.get_working_destroyed_problems()
     for (destroyed_problem_id, domain_content, problem_content) in destroyed_problem_list:
-        
         #exp modifier
         if not db_handler.is_result_already_in_database(destroyed_problem_id, exp_modifier_id):
             try:
@@ -38,10 +87,10 @@ def eval_all(db_file: str) -> None:
 
 def eval_single(modifier:ProblemModifier, modifier_id: int, destroyed_problem_id: int, db_handler: DBHandler) -> None:
     """evaluate one single destroyed_problem for exponential problem modifier"""
-    manager_time = Manager()
-    manager_error = Manager()
+    manager_time: Manager = Manager()
+    manager_error: Manager = Manager()
 
-    queue_modifier = Queue()
+    queue_modifier: Queue = Queue()
     queue_modifier.put(modifier)
     return_time_dict: dict[int, int] = manager_time.dict()
     return_error_dict: dict[int, str] = manager_error.dict()

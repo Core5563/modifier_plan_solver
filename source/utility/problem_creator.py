@@ -1,7 +1,10 @@
 """imports from unified planning"""
-from unified_planning.model import Problem, Fluent #type: ignore
+from os import makedirs
+from os.path import exists
+from unified_planning.io import PDDLWriter
+from unified_planning.model import Problem, Fluent#type: ignore
 from unified_planning.shortcuts import (#type: ignore
-    BoolType, InstantaneousAction, MinimizeActionCosts)
+    BoolType, InstantaneousAction, MinimizeActionCosts, UserType, Object)
 
 
 class ProblemCreator:
@@ -119,3 +122,291 @@ class ProblemCreator:
             problem.add_goal(goal_var)
 
         return problem
+
+    @staticmethod
+    def create_simple_problems(content_dir: str) -> None:
+        "handcrafted problems for evaluation"
+        #blocksworld
+        
+        blocksworld_template = Problem("blocksworld")
+        
+        #types
+        Block = UserType("Block")
+
+        #fluents
+        top_free = Fluent("top_free", BoolType(), b=Block)
+        on_ground = Fluent("on_ground", BoolType(), b=Block)
+        on_top = Fluent("on_top", BoolType(), top=Block, buttom=Block)
+        in_hand = Fluent("in_hand", BoolType(), b=Block)
+        hand_free = Fluent("hand_free", BoolType())
+        blocksworld_template.add_fluent(top_free, default_initial_value=False)
+        blocksworld_template.add_fluent(on_ground, default_initial_value=False)
+        blocksworld_template.add_fluent(on_top, default_initial_value=False)
+        blocksworld_template.add_fluent(in_hand, default_initial_value=False)
+        blocksworld_template.add_fluent(hand_free, default_initial_value=True)
+
+
+
+
+        
+        #actions
+
+        #take from ground
+        take_from_ground = InstantaneousAction("take_from_ground", b=Block)
+        take_from_ground_b = take_from_ground.parameter("b")
+        #precon
+        take_from_ground.add_precondition(hand_free)
+        take_from_ground.add_precondition(top_free(take_from_ground_b))
+        take_from_ground.add_precondition(on_ground(take_from_ground_b))
+        #effects
+        take_from_ground.add_effect(hand_free, False)
+        take_from_ground.add_effect(top_free(take_from_ground_b), False)
+        take_from_ground.add_effect(on_ground(take_from_ground_b), False)
+        take_from_ground.add_effect(in_hand(take_from_ground_b), True)
+        #add to template
+        blocksworld_template.add_action(take_from_ground)
+
+        #take from block
+        take_from_blocktower = InstantaneousAction("take_from_blocktower", top=Block, under_top= Block)
+        take_from_blocktower_top = take_from_blocktower.parameter("top")
+        take_from_blocktower_under_top = take_from_blocktower.parameter("under_top")
+        #precon
+        take_from_blocktower.add_precondition(hand_free)
+        take_from_blocktower.add_precondition(top_free(take_from_blocktower_top))
+        take_from_blocktower.add_precondition(on_top(take_from_blocktower_top, take_from_blocktower_under_top))
+        #effects
+        take_from_blocktower.add_effect(hand_free, False)
+        take_from_blocktower.add_effect(top_free(take_from_blocktower_top), False)
+        take_from_blocktower.add_effect(top_free(take_from_blocktower_under_top), True)
+        take_from_blocktower.add_effect(on_top(take_from_blocktower_top, take_from_blocktower_under_top), False)
+        take_from_blocktower.add_effect(in_hand(take_from_blocktower_top), True)
+        #add to template
+        blocksworld_template.add_action(take_from_blocktower)
+
+        #put on ground
+        put_on_ground = InstantaneousAction("put_on_ground", b=Block)
+        put_on_ground_b = put_on_ground.parameter("b")
+        #precon
+        put_on_ground.add_precondition(in_hand(put_on_ground_b))
+        #effects
+        put_on_ground.add_effect(hand_free, True)
+        put_on_ground.add_effect(on_ground(put_on_ground_b), True)
+        put_on_ground.add_effect(top_free(put_on_ground_b), True)
+        put_on_ground.add_effect(in_hand(put_on_ground_b), False)
+        #add to template
+        blocksworld_template.add_action(put_on_ground)
+
+        #put on block
+        put_on_block = InstantaneousAction("put_on_block", to_put_on=Block, hand_block=Block)
+        put_on_block_to_put_on = put_on_block.parameter("to_put_on")
+        put_on_block_hand_block = put_on_block.parameter("hand_block")
+        #precon
+        put_on_block.add_precondition(in_hand(put_on_block_hand_block))
+        put_on_block.add_precondition(top_free(put_on_block_to_put_on))
+        #effects
+        put_on_block.add_effect(hand_free, True)
+        put_on_block.add_effect(in_hand(put_on_block_hand_block), False)
+        put_on_block.add_effect(top_free(put_on_block_to_put_on), False)
+        put_on_block.add_effect(on_top(put_on_block_hand_block, put_on_block_to_put_on), True)
+        put_on_block.add_effect(top_free(put_on_block_hand_block), True)
+        #add to template
+        blocksworld_template.add_action(put_on_block)
+
+
+        #problem list
+        blocksworld_list: list[Problem] = []
+
+        #problem1
+        blocksworld1 = blocksworld_template.clone()
+        #create Blocks
+        blocks_string = ["BlockA", "BlockB", "BlockC"]
+        blocks_objects = [Object(block, Block) for block in blocks_string]
+        #add objects to problem
+        blocksworld1.add_objects(blocks_objects)
+        blocksworld1.set_initial_value(hand_free, True)
+        #all blocks on the ground
+        for block in blocks_objects:
+            blocksworld1.set_initial_value(on_ground(block), True)
+            blocksworld1.set_initial_value(top_free(block), True)
+        #goal all stacked on top A B C
+        for index in range(len(blocks_objects) - 1):
+            blocksworld1.add_goal(on_top(blocks_objects[index],blocks_objects[index + 1]))
+        blocksworld1.add_goal(top_free(blocks_objects[0]))
+        blocksworld1.add_goal(on_ground(blocks_objects[-1]))
+        blocksworld_list.append(blocksworld1)
+
+        #problem2
+        blocksworld2 = blocksworld_template.clone()
+        #create Blocks
+        blockA = Object("BlockA", Block)
+        blockB = Object("BlockB", Block)
+        blockC = Object("BlockC", Block)
+        blocks_objects = [blockA, blockB, blockC]
+        #add objects to problem
+        blocksworld2.add_objects(blocks_objects)
+        blocksworld2.set_initial_value(hand_free, True)
+        #inital values tower stacked the wrong way C B A
+        blocksworld2.set_initial_value(top_free(blockC), True)
+        blocksworld2.set_initial_value(on_top(blockC,blockB), True)
+        blocksworld2.set_initial_value(on_top(blockB,blockA), True)
+        blocksworld2.set_initial_value(on_ground(blockA), True)
+        #goal all stacked on top A B C
+        for index in range(len(blocks_objects) - 1):
+            blocksworld2.add_goal(on_top(blocks_objects[index],blocks_objects[index + 1]))
+        blocksworld2.add_goal(top_free(blocks_objects[0]))
+        blocksworld2.add_goal(on_ground(blocks_objects[-1]))
+        blocksworld_list.append(blocksworld2)
+
+        #problem3
+        blocksworld3 = blocksworld_template.clone()
+        #create Blocks
+        blockA = Object("BlockA", Block)
+        blockB = Object("BlockB", Block)
+        blockC = Object("BlockC", Block)
+        blocks_objects = [blockA, blockB, blockC]
+        #add objects to problem
+        blocksworld3.add_objects(blocks_objects)
+        blocksworld3.set_initial_value(hand_free, True)
+        #inital values tower stacked the wrong way C B A
+        blocksworld3.set_initial_value(top_free(blockC), True)
+        blocksworld3.set_initial_value(on_top(blockC,blockB), True)
+        blocksworld3.set_initial_value(on_top(blockB,blockA), True)
+        blocksworld3.set_initial_value(on_ground(blockA), True)
+        #goal all all on ground
+        for block in blocks_objects:
+            blocksworld3.add_goal(on_ground(block))
+            blocksworld3.add_goal(top_free(block))
+        
+        blocksworld_list.append(blocksworld3)
+
+        #problem4
+        blocksworld4 = blocksworld_template.clone()
+        #create Blocks
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_objects = [Object(block, Block) for block in blocks_string]
+        #add objects to problem
+        blocksworld4.add_objects(blocks_objects)
+        blocksworld4.set_initial_value(hand_free, True)
+        #initial values - all on ground
+        for block in blocks_objects:
+            blocksworld4.set_initial_value(on_ground(block), True)
+            blocksworld4.set_initial_value(top_free(block), True)
+        #goal all stacked on top A B C
+        for index in range(len(blocks_objects) - 1):
+            blocksworld4.add_goal(on_top(blocks_objects[index],blocks_objects[index + 1]))
+        blocksworld4.add_goal(top_free(blocks_objects[0]))
+        blocksworld4.add_goal(on_ground(blocks_objects[-1]))
+        blocksworld_list.append(blocksworld4)
+
+        #problem5
+        blocksworld5 = blocksworld_template.clone()
+        #create Blocks
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_objects = [Object(block, Block) for block in blocks_string]
+        #add objects to problem
+        blocksworld5.add_objects(blocks_objects)
+        blocksworld5.set_initial_value(hand_free, True)
+        #initial values - tower from behind like C B A
+        for index in range(len(blocks_objects) - 1):
+             blocksworld5.set_initial_value(on_top(blocks_objects[index + 1], blocks_objects[index]), True)
+        blocksworld5.set_initial_value(top_free(blocks_objects[-1]), True)
+        blocksworld5.set_initial_value(on_ground(blocks_objects[0]), True)
+        #goal all stacked on top A B C
+        for index in range(len(blocks_objects) - 1):
+            blocksworld5.add_goal(on_top(blocks_objects[index],blocks_objects[index + 1]))
+        blocksworld5.add_goal(top_free(blocks_objects[0]))
+        blocksworld5.add_goal(on_ground(blocks_objects[-1]))
+        blocksworld_list.append(blocksworld5)
+
+        #problem6
+        blocksworld6 = blocksworld_template.clone()
+        #create Blocks
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_objects = [Object(block, Block) for block in blocks_string]
+        #add objects to problem
+        blocksworld6.add_objects(blocks_objects)
+        blocksworld6.set_initial_value(hand_free, True)
+        #initial values - tower from behind like C B A
+        for index in range(len(blocks_objects) - 1):
+             blocksworld6.set_initial_value(on_top(blocks_objects[index + 1], blocks_objects[index]), True)
+        blocksworld6.set_initial_value(top_free(blocks_objects[-1]), True)
+        blocksworld6.set_initial_value(on_ground(blocks_objects[0]), True)
+        #goal all on ground
+        for block in blocks_objects:
+            blocksworld3.add_goal(on_ground(block))
+            blocksworld3.add_goal(top_free(block))
+        blocksworld_list.append(blocksworld6)
+
+        #problem7
+        blocksworld7 = blocksworld_template.clone()
+        #create Blocks
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_objects = [Object(block, Block) for block in blocks_string]
+        #add objects to problem
+        blocksworld7.add_objects(blocks_objects)
+        blocksworld7.set_initial_value(hand_free, True)
+        #initial values - all on ground
+        for block in blocks_objects:
+            blocksworld7.set_initial_value(on_ground(block), True)
+            blocksworld7.set_initial_value(top_free(block), True)
+        #goal all stacked on top A B C
+        for index in range(len(blocks_objects) - 1):
+            blocksworld7.add_goal(on_top(blocks_objects[index],blocks_objects[index + 1]))
+        blocksworld7.add_goal(top_free(blocks_objects[0]))
+        blocksworld7.add_goal(on_ground(blocks_objects[-1]))
+        blocksworld_list.append(blocksworld7)
+
+        #problem8
+        blocksworld8 = blocksworld_template.clone()
+        #create Blocks
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_objects = [Object(block, Block) for block in blocks_string]
+        #add objects to problem
+        blocksworld8.add_objects(blocks_objects)
+        blocksworld8.set_initial_value(hand_free, True)
+        #initial values - tower from behind like C B A
+        for index in range(len(blocks_objects) - 1):
+             blocksworld8.set_initial_value(on_top(blocks_objects[index + 1], blocks_objects[index]), True)
+        blocksworld8.set_initial_value(top_free(blocks_objects[-1]), True)
+        blocksworld8.set_initial_value(on_ground(blocks_objects[0]), True)
+        #goal all stacked on top A B C
+        for index in range(len(blocks_objects) - 1):
+            blocksworld8.add_goal(on_top(blocks_objects[index],blocks_objects[index + 1]))
+        blocksworld8.add_goal(top_free(blocks_objects[0]))
+        blocksworld8.add_goal(on_ground(blocks_objects[-1]))
+        blocksworld_list.append(blocksworld8)
+
+        #problem9
+        blocksworld9 = blocksworld_template.clone()
+        #create Blocks
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_objects = [Object(block, Block) for block in blocks_string]
+        #add objects to problem
+        blocksworld9.add_objects(blocks_objects)
+        blocksworld9.set_initial_value(hand_free, True)
+        #initial values - tower from behind like C B A
+        for index in range(len(blocks_objects) - 1):
+             blocksworld9.set_initial_value(on_top(blocks_objects[index + 1], blocks_objects[index]), True)
+        blocksworld9.set_initial_value(top_free(blocks_objects[-1]), True)
+        blocksworld9.set_initial_value(on_ground(blocks_objects[0]), True)
+        #goal all on ground
+        for block in blocks_objects:
+            blocksworld9.add_goal(on_ground(block))
+            blocksworld9.add_goal(top_free(block))
+        blocksworld_list.append(blocksworld9)
+
+        #write into seperate directory
+        count: int = 1
+        for blocksworld_problem in blocksworld_list:
+            subdir_path = content_dir + "/subdir"+ str(count)
+            if not exists(subdir_path):
+                makedirs(subdir_path)
+            domain_path =  subdir_path + "/" + "domain.pddl"
+            problem_path = subdir_path+ "/" + "problem.pddl"
+            writer = PDDLWriter(blocksworld_problem)
+            writer.write_domain(domain_path)
+            writer.write_problem(problem_path)
+            count += 1
+        
+        
+        

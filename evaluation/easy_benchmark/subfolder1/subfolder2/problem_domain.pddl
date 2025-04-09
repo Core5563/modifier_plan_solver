@@ -1,5 +1,0 @@
-(define (problem grounder_none_problem-problem)
- (:domain grounder_none_problem-domain)
- (:init)
- (:goal (and (q) (p)))
-)

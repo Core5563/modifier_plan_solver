@@ -196,7 +196,7 @@ class DBHandler:
             "SELECT original_problems.originalProblemID FROM original_problems " + 
             "WHERE  original_problems.originalProblemID NOT IN (SELECT destroyedProblemID FROM destroyed_problems) " +
             "AND original_problems.errorText IS NULL " + 
-            "AND original_problems.longerThan30Minutes != FALSE" 
+            "AND original_problems.longerThan30Minutes != TRUE" 
         )
         return res.fetchall()
 

@@ -19,5 +19,5 @@ COPY run_evaluate.py ./run_evaluate.py
 #USER app
 
 
-#CMD ["python", "run_destroy_problems.py"]
-CMD ["python", "run_evaluate.py"]
+CMD ["python", "run_destroy_problems.py"]
+#CMD ["python", "run_evaluate.py"]
