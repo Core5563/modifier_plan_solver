@@ -96,7 +96,6 @@ class ProblemDestroyer:
                 print("info")
                 print(grounded_information.problem.kind)
                 to_solve_problem = grounded_information.problem
-
                 
                 process_solving = Process(target=solve_problem_with_multithreading_and_time_calc, name="solving", args=(to_solve_problem, return_solution_dict, return_time_dict, return_error_dict))
             
@@ -135,6 +134,17 @@ class ProblemDestroyer:
                 
                 #analyze plan to get results
                 solution: PlanGenerationResult = return_solution_dict[0]
+                if solution.status in [PlanGenerationResultStatus.UNSOLVABLE_PROVEN, PlanGenerationResultStatus.UNSOLVABLE_INCOMPLETELY]:
+                    print("error: original problem not solvable")
+                    self.db_handler.insert_into_original_problems(
+                    problem_path,
+                    domain_path,
+                    0,
+                    0,
+                    "error: problem not solvable"
+                    )
+                    continue
+                
                 analyzer = PlanAnalyser()
                 start = return_time_dict[0]
                 end = return_time_dict[1]
@@ -257,6 +267,13 @@ class ProblemDestroyer:
         #initalize problem to destroy
         problem_to_destroy: Problem = transform_grounded_problem_to_standard(grounded_information.problem.clone())
         
+        #write away grounded state
+        grounded_domain_path = domain_path.replace("domain.pddl", "grounded_domain.pddl")
+        grounded_problem_path = problem_path.replace("problem.pddl", "grounded_problem.pddl")
+        writer = PDDLWriter(problem_to_destroy)
+        writer.write_domain(grounded_domain_path)
+        writer.write_problem(grounded_problem_path)
+
         #print(problem_to_destroy)
         is_problem_solvable: bool = True
 

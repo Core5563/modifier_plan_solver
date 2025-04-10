@@ -12,6 +12,7 @@ COPY source ./source
 COPY evaluation ./evaluation
 COPY run_destroy_problems.py ./run_destroy_problems.py
 COPY run_evaluate.py ./run_evaluate.py
+COPY run_simple_benchmark.py ./run_simple_benchmark.py
 #EXPOSE 5000
 
 # Setup an app user so the container doesn't run as the root user
@@ -19,5 +20,6 @@ COPY run_evaluate.py ./run_evaluate.py
 #USER app
 
 
-CMD ["python", "run_destroy_problems.py"]
+#CMD ["python", "run_destroy_problems.py"]
 #CMD ["python", "run_evaluate.py"]
+CMD ["python", "run_simple_benchmark.py"]

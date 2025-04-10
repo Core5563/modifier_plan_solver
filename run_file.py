@@ -17,7 +17,7 @@ from source.utility.directory_scanner import DirectoryScanner
 from source.utility.db_handler import DBHandler
 from source.utility.problem_destroyer import ProblemDestroyer
 from source.utility.file_util import remove_file
-from source.utility.evaluation import eval_all
+from source.utility.evaluation import eval_all, write_out_problems
 from source.utility.transform_grounded import transform_grounded_problem_to_standard
 from source.utility.eval_ipc2016 import load_ipc206_problems_into_database
 
@@ -669,8 +669,26 @@ def run_eval_all():
 
 
 def create_handcrafted_problems():
-    dir_path = "out/handcrafted"
+    dir_path = "evaluation/simple_benchmark"
+    #dir_path = "out/handcrafted"
     ProblemCreator.create_simple_problems(dir_path)
+
+def run_simple_benchmark():
+    db_file = "out/simpleEval.db"
+    db_handler = DBHandler(db_file)
+    db_handler.remove_db_file()
+    db_handler = DBHandler(db_file)
+    db_handler.initialize_db()
+    db_handler.close()
+    problem_destroyer = ProblemDestroyer(db_file)
+    problem_destroyer.load_all_problems_simple_benchmark()
+    problem_destroyer.destroy_problems()
+    problem_destroyer.close()
+    write_out_problems(db_file)
+    eval_all(db_file)
+    
+    db_handler = DBHandler(db_file)
+    db_handler.look_into()
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -689,12 +707,13 @@ if __name__ == '__main__':
     #time_calc()
     #run_exception_fluent()
     #create_handcrafted_problems()
-
+    run_simple_benchmark()
     #run_mutate()
     #run_test_eval()
     #change_db()
     
     #run_load_IPC2016()
+
 
 
 
@@ -706,7 +725,7 @@ if __name__ == '__main__':
     #run_eval_all()
     
     
-    docker_look_into()
+    #docker_look_into()
 
     
 
@@ -715,4 +734,5 @@ if __name__ == '__main__':
 
     #run_export_db()
     #run_import_db()
+    
     pass

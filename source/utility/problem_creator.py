@@ -333,14 +333,14 @@ class ProblemCreator:
         blocksworld6.set_initial_value(on_ground(blocks_objects[0]), True)
         #goal all on ground
         for block in blocks_objects:
-            blocksworld3.add_goal(on_ground(block))
-            blocksworld3.add_goal(top_free(block))
+            blocksworld6.add_goal(on_ground(block))
+            blocksworld6.add_goal(top_free(block))
         blocksworld_list.append(blocksworld6)
 
         #problem7
         blocksworld7 = blocksworld_template.clone()
         #create Blocks
-        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ", "BlockK", "BlockL", "BlockM", "BlockN", "BlockO", "BlockP", "BlockQ", "BlockR", "BlockS", "BlockT"]
         blocks_objects = [Object(block, Block) for block in blocks_string]
         #add objects to problem
         blocksworld7.add_objects(blocks_objects)
@@ -359,7 +359,7 @@ class ProblemCreator:
         #problem8
         blocksworld8 = blocksworld_template.clone()
         #create Blocks
-        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ", "BlockK", "BlockL", "BlockM", "BlockN", "BlockO", "BlockP", "BlockQ", "BlockR", "BlockS", "BlockT"]
         blocks_objects = [Object(block, Block) for block in blocks_string]
         #add objects to problem
         blocksworld8.add_objects(blocks_objects)
@@ -379,7 +379,7 @@ class ProblemCreator:
         #problem9
         blocksworld9 = blocksworld_template.clone()
         #create Blocks
-        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ", "BlockK", "BlockL", "BlockM", "BlockN", "BlockO", "BlockP", "BlockQ", "BlockR", "BlockS", "BlockT"]
         blocks_objects = [Object(block, Block) for block in blocks_string]
         #add objects to problem
         blocksworld9.add_objects(blocks_objects)
@@ -395,10 +395,13 @@ class ProblemCreator:
             blocksworld9.add_goal(top_free(block))
         blocksworld_list.append(blocksworld9)
 
-        #write into seperate directory
+        #write blocksworld into seperate directory
         count: int = 1
         for blocksworld_problem in blocksworld_list:
-            subdir_path = content_dir + "/subdir"+ str(count)
+            blocksworld_dir = content_dir + "/blocksworld"
+            if not exists(blocksworld_dir):
+                makedirs(blocksworld_dir)
+            subdir_path = blocksworld_dir + "/subdir"+ str(count)
             if not exists(subdir_path):
                 makedirs(subdir_path)
             domain_path =  subdir_path + "/" + "domain.pddl"
@@ -408,5 +411,59 @@ class ProblemCreator:
             writer.write_problem(problem_path)
             count += 1
         
-        
-        
+
+        #pseudo strips
+        Obj = UserType("Obj")
+        pseudo_strips_problem_list: list[Problem] = []
+        pseudo_strips_template = Problem("pseudo_strips")
+
+        #problem1
+        pseudo_strips1 = pseudo_strips_template.clone()
+        #fluents
+        pseudo_strips1_x = Fluent("x",BoolType(), o=Obj)
+        pseudo_strips1_y = Fluent("y",BoolType(), o=Obj)
+        pseudo_strips1_z = Fluent("z",BoolType(), o=Obj)
+        pseudo_strips1_p = Fluent("p",BoolType(), o=Obj)
+        pseudo_strips1_q = Fluent("q",BoolType(), o=Obj)
+        pseudo_strips1.add_fluent(pseudo_strips1_x, default_initial_value=False)
+        pseudo_strips1.add_fluent(pseudo_strips1_y, default_initial_value=False)
+        pseudo_strips1.add_fluent(pseudo_strips1_z, default_initial_value=False)
+        pseudo_strips1.add_fluent(pseudo_strips1_p, default_initial_value=False)
+        pseudo_strips1.add_fluent(pseudo_strips1_q, default_initial_value=False)
+        #actions
+        pseudo_strips1_a1 = InstantaneousAction("a1", o=Obj)
+        pseudo_strips1_a1_o = pseudo_strips1_a1.parameter("o")
+        pseudo_strips1_a1.add_precondition(pseudo_strips1_x(pseudo_strips1_a1_o))
+        pseudo_strips1_a1.add_precondition(pseudo_strips1_y(pseudo_strips1_a1_o))
+        pseudo_strips1_a1.add_effect(pseudo_strips1_p(pseudo_strips1_a1_o), True)
+        pseudo_strips1_a1.add_effect(pseudo_strips1_z(pseudo_strips1_a1_o), True)
+        pseudo_strips1.add_action(pseudo_strips1_a1)
+        pseudo_strips1_a2 = InstantaneousAction("a2", o=Obj)
+        pseudo_strips1_a2_o = pseudo_strips1_a2.parameter("o")
+        pseudo_strips1_a2.add_precondition(pseudo_strips1_z(pseudo_strips1_a2_o))
+        pseudo_strips1_a2.add_effect(pseudo_strips1_q(pseudo_strips1_a2_o), True)
+        pseudo_strips1.add_action(pseudo_strips1_a2)
+        #initial values
+        pseudo_strips1_o1 = Object("o1", Obj)
+        pseudo_strips1.add_object(pseudo_strips1_o1)
+        pseudo_strips1.set_initial_value(pseudo_strips1_x(pseudo_strips1_o1), True)
+        pseudo_strips1.set_initial_value(pseudo_strips1_y(pseudo_strips1_o1), True)
+        pseudo_strips1.add_goal(pseudo_strips1_p(pseudo_strips1_o1))
+        pseudo_strips1.add_goal(pseudo_strips1_q(pseudo_strips1_o1))
+        pseudo_strips_problem_list.append(pseudo_strips1)
+
+        count: int = 1
+        for pseudo_problem in pseudo_strips_problem_list:
+            pseudo_strips_dir = content_dir + "/pseudo_strips"
+            if not exists(pseudo_strips_dir):
+                makedirs(pseudo_strips_dir)
+            subdir_path = pseudo_strips_dir + "/subdir"+ str(count)
+            if not exists(subdir_path):
+                makedirs(subdir_path)
+            domain_path =  subdir_path + "/" + "domain.pddl"
+            problem_path = subdir_path+ "/" + "problem.pddl"
+            writer = PDDLWriter(pseudo_problem)
+            writer.write_domain(domain_path)
+            writer.write_problem(problem_path)
+            count += 1
+    

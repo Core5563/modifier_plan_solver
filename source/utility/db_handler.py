@@ -27,6 +27,7 @@ class DBHandler:
 
     def remove_db_file(self) -> None:
         """remove db file"""
+        self.close()
         try:
             os.remove(self.database_file_filepath)
         except FileNotFoundError:
@@ -214,3 +215,28 @@ class DBHandler:
         """run one command"""
         self.curs.execute(command_string)
         self.commit()
+
+    def look_into(self):
+        """report back contents"""
+        print("all from original problems: =================")
+        for (original_problem_id, domain_file_path, problem_file_path, plan_solvable_cost,solve_time_milliseconds, error_text, is_longer_30_min) in self.get_all_original_problems():
+            print_tuple = (original_problem_id, domain_file_path, problem_file_path, plan_solvable_cost,solve_time_milliseconds,'' if error_text is None else 'error', False if is_longer_30_min == 0 else True)
+            print(print_tuple)
+            if error_text is not None:
+                error_text_str: str = error_text
+                print(error_text_str.replace("|", "\n").replace("#", "\""))
+
+        print("all from destroyed problems: ================")
+        for (original_problem_id, path_domain, path_problem, content_domain, content_problem, error_text) in self.get_all_destroyed_problems():
+            print_tuple = (original_problem_id, path_domain, path_problem, '' if error_text is None else 'error')
+            print(print_tuple)
+            if error_text is not None:
+                error_text_str: str = error_text
+                print(error_text_str.replace("|", "\n").replace("#", "\""))
+
+        print("all from add preconditions===================")
+        print(self.get_all_add_preconditions())
+        print("all from results:============================")
+        print(self.get_all_from_results())
+        print("all from left preconditions: ================")
+        print(self.get_all_left_preconditions_results())
