@@ -340,7 +340,8 @@ class ProblemCreator:
         #problem7
         blocksworld7 = blocksworld_template.clone()
         #create Blocks
-        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ", "BlockK", "BlockL", "BlockM", "BlockN", "BlockO", "BlockP", "BlockQ", "BlockR", "BlockS", "BlockT"]
+        #blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ", "BlockK", "BlockL", "BlockM", "BlockN", "BlockO", "BlockP", "BlockQ", "BlockR", "BlockS", "BlockT"]
+        blocks_string = ["BlockA", "BlockB"]
         blocks_objects = [Object(block, Block) for block in blocks_string]
         #add objects to problem
         blocksworld7.add_objects(blocks_objects)
@@ -359,7 +360,8 @@ class ProblemCreator:
         #problem8
         blocksworld8 = blocksworld_template.clone()
         #create Blocks
-        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ", "BlockK", "BlockL", "BlockM", "BlockN", "BlockO", "BlockP", "BlockQ", "BlockR", "BlockS", "BlockT"]
+        #blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ", "BlockK", "BlockL", "BlockM", "BlockN", "BlockO", "BlockP", "BlockQ", "BlockR", "BlockS", "BlockT"]
+        blocks_string = ["BlockA", "BlockB"]
         blocks_objects = [Object(block, Block) for block in blocks_string]
         #add objects to problem
         blocksworld8.add_objects(blocks_objects)
@@ -379,7 +381,8 @@ class ProblemCreator:
         #problem9
         blocksworld9 = blocksworld_template.clone()
         #create Blocks
-        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ", "BlockK", "BlockL", "BlockM", "BlockN", "BlockO", "BlockP", "BlockQ", "BlockR", "BlockS", "BlockT"]
+        #blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ", "BlockK", "BlockL", "BlockM", "BlockN", "BlockO", "BlockP", "BlockQ", "BlockR", "BlockS", "BlockT"]
+        blocks_string = ["BlockA", "BlockB"]
         blocks_objects = [Object(block, Block) for block in blocks_string]
         #add objects to problem
         blocksworld9.add_objects(blocks_objects)
@@ -452,6 +455,49 @@ class ProblemCreator:
         pseudo_strips1.add_goal(pseudo_strips1_q(pseudo_strips1_o1))
         pseudo_strips_problem_list.append(pseudo_strips1)
 
+        #problem2
+        pseudo_strips2 = pseudo_strips_template.clone()
+        #fluents
+        pseudo_strips2_x = Fluent("x",BoolType(), o=Obj)
+        pseudo_strips2_y = Fluent("y",BoolType(), o=Obj)
+        pseudo_strips2_z = Fluent("z",BoolType(), o=Obj)
+        pseudo_strips2_p = Fluent("p",BoolType(), o=Obj)
+        pseudo_strips2_q = Fluent("q",BoolType(), o=Obj)
+        pseudo_strips2.add_fluent(pseudo_strips2_x, default_initial_value=False)
+        pseudo_strips2.add_fluent(pseudo_strips2_y, default_initial_value=False)
+        pseudo_strips2.add_fluent(pseudo_strips2_z, default_initial_value=False)
+        pseudo_strips2.add_fluent(pseudo_strips2_p, default_initial_value=False)
+        pseudo_strips2.add_fluent(pseudo_strips2_q, default_initial_value=False)
+        #action
+        pseudo_strips2_a1 = InstantaneousAction("a1", o=Obj)
+        pseudo_strips2_a1_o = pseudo_strips2_a1.parameter("o")
+        pseudo_strips2_a1.add_precondition(pseudo_strips2_x(pseudo_strips2_a1_o))
+        pseudo_strips2_a1.add_precondition(pseudo_strips2_y(pseudo_strips2_a1_o))
+        pseudo_strips2_a1.add_effect(pseudo_strips2_z(pseudo_strips2_a1_o), True)
+        pseudo_strips2.add_action(pseudo_strips2_a1)
+        pseudo_strips2_a2 = InstantaneousAction("a2", o=Obj)
+        pseudo_strips2_a2_o = pseudo_strips2_a2.parameter("o")
+        pseudo_strips2_a2.add_precondition(pseudo_strips2_z(pseudo_strips2_a2_o))
+        pseudo_strips2_a2.add_effect(pseudo_strips2_z(pseudo_strips2_a2_o), False)
+        pseudo_strips2_a2.add_effect(pseudo_strips2_p(pseudo_strips2_a2_o), True)
+        pseudo_strips2.add_action(pseudo_strips2_a2)
+        pseudo_strips2_a3 = InstantaneousAction("a3", o=Obj)
+        pseudo_strips2_a3_o = pseudo_strips2_a3.parameter("o")
+        pseudo_strips2_a3.add_precondition(pseudo_strips2_z(pseudo_strips2_a3_o))
+        pseudo_strips2_a3.add_effect(pseudo_strips2_z(pseudo_strips2_a3_o), False)
+        pseudo_strips2_a3.add_effect(pseudo_strips2_q(pseudo_strips2_a3_o), True)
+        pseudo_strips2.add_action(pseudo_strips2_a3)
+        #initial state
+        pseudo_strips2_o1 = Object("o1", Obj)
+        pseudo_strips2.add_object(pseudo_strips2_o1)
+        pseudo_strips2.set_initial_value(pseudo_strips2_x(pseudo_strips2_o1), True)
+        pseudo_strips2.set_initial_value(pseudo_strips2_y(pseudo_strips2_o1), True)
+        #goal
+        pseudo_strips2.add_goal(pseudo_strips2_p(pseudo_strips2_o1))
+        pseudo_strips2.add_goal(pseudo_strips2_q(pseudo_strips2_o1))
+        pseudo_strips_problem_list.append(pseudo_strips2)
+
+
         count: int = 1
         for pseudo_problem in pseudo_strips_problem_list:
             pseudo_strips_dir = content_dir + "/pseudo_strips"
@@ -466,4 +512,172 @@ class ProblemCreator:
             writer.write_domain(domain_path)
             writer.write_problem(problem_path)
             count += 1
+    
+        #logistics example
+        logistics_problem_list: list[Problem] = []
+        logistic_problem_template = Problem("logistic-problem")
+        #types
+        Location = UserType("location")
+        Land = UserType("Land")
+        Transport = UserType("Transport")
+        Goods = UserType("Goods")
+        #fluents
+        at_location = Fluent("at_location", BoolType(), transport=Transport, location=Location)
+        road_from_to = Fluent("road_from_to", BoolType(), road_from=Location, road_to=Location)
+        sea_access = Fluent("sea_access", BoolType(), location=Location)
+        goods_in_location = Fluent("goods_in_location", BoolType(), goods=Goods, location=Location)
+        goods_in_transport = Fluent("goods_in_transport", BoolType(), goods=Goods, transport=Transport)
+        location_in_land = Fluent("location_in_land", BoolType(), location=Location, land=Land)
+        is_ship = Fluent("is_ship", BoolType(), transport=Transport)
+        is_truck = Fluent("is_truck", BoolType(), transport=Transport)
+        logistic_problem_template.add_fluent(at_location, default_initial_value=False)
+        logistic_problem_template.add_fluent(road_from_to, default_initial_value=False)
+        logistic_problem_template.add_fluent(sea_access, default_initial_value=False)
+        logistic_problem_template.add_fluent(goods_in_location, default_initial_value=False)
+        logistic_problem_template.add_fluent(goods_in_transport, default_initial_value=False)
+        logistic_problem_template.add_fluent(location_in_land, default_initial_value=False)
+        logistic_problem_template.add_fluent(is_ship, default_initial_value=False)
+        logistic_problem_template.add_fluent(is_truck, default_initial_value=False)
+        
+        #action
+        load = InstantaneousAction("load", goods=Goods, transport=Transport, location=Location)
+        load_goods = load.parameter("goods")
+        load_transport = load.parameter("transport")
+        load_location = load.parameter("location")
+        load.add_precondition(goods_in_location(load_goods, load_location))
+        load.add_precondition(at_location(load_transport, load_location))
+        load.add_effect(goods_in_location(load_goods, load_location), False)
+        load.add_effect(goods_in_transport(load_goods, load_transport), True)
+        logistic_problem_template.add_action(load)
+        unload = InstantaneousAction("unload", goods=Goods, transport=Transport, location=Location)
+        unload_goods = unload.parameter("goods")
+        unload_transport = unload.parameter("transport")
+        unload_location = unload.parameter("location")
+        unload.add_precondition(goods_in_transport(unload_goods, unload_transport))
+        unload.add_precondition(at_location(unload_transport, unload_location))
+        unload.add_effect(goods_in_location(unload_goods, unload_location), True)
+        unload.add_effect(goods_in_transport(unload_goods, unload_transport), False)
+        logistic_problem_template.add_action(unload)
+        move_truck = InstantaneousAction("move_truck", transport=Transport, move_from=Location, move_to=Location)
+        move_truck_transport=move_truck.parameter("transport")
+        move_truck_from=move_truck.parameter("move_from")
+        move_truck_to=move_truck.parameter("move_to")
+        move_truck.add_precondition(is_truck(move_truck_transport))
+        move_truck.add_precondition(at_location(move_truck_transport, move_truck_from))
+        move_truck.add_precondition(road_from_to(move_truck_from, move_truck_to))
+        move_truck.add_effect(at_location(move_truck_transport, move_truck_from), False)
+        move_truck.add_effect(at_location(move_truck_transport, move_truck_to), True)
+        logistic_problem_template.add_action(move_truck)
+        move_ship = InstantaneousAction("move_ship", transport=Transport, move_from=Location, move_to=Location)
+        move_ship_transport=move_ship.parameter("transport")
+        move_ship_from=move_ship.parameter("move_from")
+        move_ship_to=move_ship.parameter("move_to")
+        move_ship.add_precondition(is_ship(move_ship_transport))
+        move_ship.add_precondition(sea_access(move_ship_from))
+        move_ship.add_precondition(sea_access(move_ship_to))
+        move_ship.add_precondition(at_location(move_ship_transport, move_ship_from))
+        move_ship.add_effect(at_location(move_ship_transport, move_ship_from), False)
+        move_ship.add_effect(at_location(move_ship_transport, move_ship_to), True)
+        logistic_problem_template.add_action(move_ship)
+        
+        #problem1
+        logistic_problem1 = logistic_problem_template.clone()
+        warehouse_land_1 = Object("warehouse_land_1", Location)
+        harbor_land_1 = Object("harbor_land_1", Location)
+        warehouse_land_2 = Object("warehouse_land_2", Location)
+        harbor_land_2 = Object("harbor_land_2", Location)
+        truck_land_1 = Object("truck_land_1", Transport)
+        truck_land_2 = Object("truck_land_2", Transport)
+        ship = Object("ship", Transport)
+        valuable_goods = Object("valuable_goods", Goods)
+        logistic_problem1.add_objects([warehouse_land_1, warehouse_land_2, harbor_land_1, harbor_land_2, truck_land_1, truck_land_2, ship, valuable_goods])
+        logistic_problem1.set_initial_value(is_truck(truck_land_1), True)
+        logistic_problem1.set_initial_value(at_location(truck_land_1, warehouse_land_1), True)
+        logistic_problem1.set_initial_value(at_location(truck_land_2, warehouse_land_2), True)
+        logistic_problem1.set_initial_value(is_truck(truck_land_2), True)
+        logistic_problem1.set_initial_value(is_ship(ship), True)
+        logistic_problem1.set_initial_value(at_location(ship, harbor_land_1), True)
+        logistic_problem1.set_initial_value(road_from_to(harbor_land_1, warehouse_land_1), True)
+        logistic_problem1.set_initial_value(road_from_to(warehouse_land_1, harbor_land_1), True)
+        logistic_problem1.set_initial_value(road_from_to(harbor_land_2, warehouse_land_2), True)
+        logistic_problem1.set_initial_value(road_from_to(warehouse_land_2, harbor_land_2), True)
+        logistic_problem1.set_initial_value(sea_access(harbor_land_1), True)
+        logistic_problem1.set_initial_value(sea_access(harbor_land_2), True)
+        logistic_problem1.set_initial_value(goods_in_location(valuable_goods, warehouse_land_1), True)
+        logistic_problem1.add_goal(goods_in_location(valuable_goods, warehouse_land_2))
+        logistics_problem_list.append(logistic_problem1)
+
+        #problem2
+        logistic_problem2 = logistic_problem_template.clone()
+        warehouse_land_1 = Object("warehouse_land_1", Location)
+        harbor_land_1 = Object("harbor_land_1", Location)
+        warehouse_land_2 = Object("warehouse_land_2", Location)
+        harbor_land_2 = Object("harbor_land_2", Location)
+        truck_land_1 = Object("truck_land_1", Transport)
+        truck_land_2 = Object("truck_land_2", Transport)
+        ship = Object("ship", Transport)
+        valuable_goods = Object("valuable_goods", Goods)
+        logistic_problem2.add_objects([warehouse_land_1, warehouse_land_2, harbor_land_1, harbor_land_2, truck_land_1, truck_land_2, ship, valuable_goods])
+        logistic_problem2.set_initial_value(is_truck(truck_land_1), True)
+        logistic_problem2.set_initial_value(at_location(truck_land_1, warehouse_land_1), True)
+        logistic_problem2.set_initial_value(at_location(truck_land_2, warehouse_land_2), True)
+        logistic_problem2.set_initial_value(is_truck(truck_land_2), True)
+        logistic_problem2.set_initial_value(is_ship(ship), True)
+        logistic_problem2.set_initial_value(at_location(ship, harbor_land_1), True)
+        logistic_problem2.set_initial_value(road_from_to(harbor_land_1, warehouse_land_1), True)
+        logistic_problem2.set_initial_value(road_from_to(warehouse_land_1, harbor_land_1), True)
+        logistic_problem2.set_initial_value(road_from_to(harbor_land_2, warehouse_land_2), True)
+        logistic_problem2.set_initial_value(road_from_to(warehouse_land_2, harbor_land_2), True)
+        logistic_problem2.set_initial_value(sea_access(harbor_land_1), True)
+        logistic_problem2.set_initial_value(sea_access(harbor_land_2), True)
+        logistic_problem2.set_initial_value(goods_in_location(valuable_goods, warehouse_land_1), True)
+        logistic_problem2.add_goal(goods_in_location(valuable_goods, harbor_land_1))
+        logistics_problem_list.append(logistic_problem2)
+
+        #problem3
+        logistic_problem3 = logistic_problem_template.clone()
+        warehouse_land_1 = Object("warehouse_land_1", Location)
+        harbor_land_1 = Object("harbor_land_1", Location)
+        warehouse_land_2 = Object("warehouse_land_2", Location)
+        harbor_land_2 = Object("harbor_land_2", Location)
+        truck_land_1 = Object("truck_land_1", Transport)
+        truck_land_2 = Object("truck_land_2", Transport)
+        ship = Object("ship", Transport)
+        valuable_goods1 = Object("valuable_goods1", Goods)
+        valuable_goods2 = Object("valuable_goods2", Goods)
+        logistic_problem3.add_objects([warehouse_land_1, warehouse_land_2, harbor_land_1, harbor_land_2, truck_land_1, truck_land_2, ship, valuable_goods1, valuable_goods2])
+        logistic_problem3.set_initial_value(is_truck(truck_land_1), True)
+        logistic_problem3.set_initial_value(at_location(truck_land_1, warehouse_land_1), True)
+        logistic_problem3.set_initial_value(at_location(truck_land_2, warehouse_land_2), True)
+        logistic_problem3.set_initial_value(is_truck(truck_land_2), True)
+        logistic_problem3.set_initial_value(is_ship(ship), True)
+        logistic_problem3.set_initial_value(at_location(ship, harbor_land_1), True)
+        logistic_problem3.set_initial_value(road_from_to(harbor_land_1, warehouse_land_1), True)
+        logistic_problem3.set_initial_value(road_from_to(warehouse_land_1, harbor_land_1), True)
+        logistic_problem3.set_initial_value(road_from_to(harbor_land_2, warehouse_land_2), True)
+        logistic_problem3.set_initial_value(road_from_to(warehouse_land_2, harbor_land_2), True)
+        logistic_problem3.set_initial_value(sea_access(harbor_land_1), True)
+        logistic_problem3.set_initial_value(sea_access(harbor_land_2), True)
+        logistic_problem3.set_initial_value(goods_in_location(valuable_goods1, warehouse_land_1), True)
+        logistic_problem3.set_initial_value(goods_in_location(valuable_goods2, warehouse_land_2), True)
+        logistic_problem3.add_goal(goods_in_location(valuable_goods1, warehouse_land_2))
+        logistic_problem3.add_goal(goods_in_location(valuable_goods2, warehouse_land_1))
+        logistics_problem_list.append(logistic_problem3)
+
+        count: int = 1
+        for logistics_problem in logistics_problem_list:
+            logistic_dir = content_dir + "/logistics"
+            if not exists(logistic_dir):
+                makedirs(logistic_dir)
+            subdir_path = logistic_dir + "/subdir"+ str(count)
+            if not exists(subdir_path):
+                makedirs(subdir_path)
+            domain_path =  subdir_path + "/" + "domain.pddl"
+            problem_path = subdir_path+ "/" + "problem.pddl"
+            writer = PDDLWriter(logistics_problem)
+            writer.write_domain(domain_path)
+            writer.write_problem(problem_path)
+            count += 1
+
+
     

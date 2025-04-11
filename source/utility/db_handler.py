@@ -109,16 +109,28 @@ class DBHandler:
         return_tuple = res.fetchone()
         return return_tuple
 
-    def insert_destroy_problems(self, problem_id:int,  problem_filepath: str, domain_filepath: str, problem_content: str, domain_content: str, error_text: str | None = None)-> None:
+    def insert_destroy_problems(
+            self, 
+            problem_id:int, 
+            problem_filepath: str, 
+            domain_filepath: str, 
+            problem_content: str, 
+            domain_content: str, 
+            error_text: str | None = None,
+            grounded_problem_content: str | None = None,
+            grounded_domain_content: str | None = None
+            )-> None:
         """insert into the destroyed problems table"""
         self.curs.execute(
-            "INSERT INTO destroyed_problems(destroyedProblemID, domainFilePath, problemFilePath, domainContent, problemContent, errorText) VALUES " +
+            "INSERT INTO destroyed_problems(destroyedProblemID, domainFilePath, problemFilePath, domainContent, problemContent, errorText, groundedProblemContent, groundedDomainContent) VALUES " +
             "(" + str(problem_id) + "," +
             "\"" + domain_filepath + "\"," +
             "\"" + problem_filepath + "\"," +
             "\"" + domain_content + "\"," +
             "\"" + problem_content + "\"," +
-            ( "NULL" if error_text is None else ("\"" + error_text.replace("\"", "#").replace("\n", "|") + "\"")) +
+            ( "NULL" if error_text is None else ("\"" + error_text.replace("\"", "#").replace("\n", "|") + "\"")) + "," +
+            ("NULL" if grounded_problem_content is None else ("\"" + grounded_problem_content + "\"")) + "," +
+            ("NULL" if grounded_domain_content is None else ("\"" + grounded_domain_content + "\"")) +
             ")"
         )
         self.commit()
@@ -227,7 +239,7 @@ class DBHandler:
                 print(error_text_str.replace("|", "\n").replace("#", "\""))
 
         print("all from destroyed problems: ================")
-        for (original_problem_id, path_domain, path_problem, content_domain, content_problem, error_text) in self.get_all_destroyed_problems():
+        for (original_problem_id, path_domain, path_problem, content_domain, content_problem, error_text, grounded_problem_content, grounded_domain_content) in self.get_all_destroyed_problems():
             print_tuple = (original_problem_id, path_domain, path_problem, '' if error_text is None else 'error')
             print(print_tuple)
             if error_text is not None:

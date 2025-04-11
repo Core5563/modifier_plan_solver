@@ -667,6 +667,61 @@ def run_eval_all():
     db_file = "tempEval.db"
     eval_all(db_file)
 
+def look_at_blocksworld():
+    reader = PDDLReader()
+    benchmark_path = "evaluation/simple_benchmark/blocksworld/subdir1/"
+    lifted_problem = transform_grounded_problem_to_standard(reader.parse_problem(benchmark_path + "domain.pddl", benchmark_path + "problem.pddl"))
+    print("lifted:")
+    print("amount of fluents:" + str(len(lifted_problem.fluents)))
+    print("amount of initial values:" +  str(len(lifted_problem.initial_values)))
+    print("amount of grounded variables:" +  str(count_grounded_variables(lifted_problem)))
+    print("amount of actions:" + str(len(lifted_problem.actions)))
+    grounded_problem = transform_grounded_problem_to_standard(reader.parse_problem(benchmark_path + "grounded_domain.pddl", benchmark_path + "grounded_problem.pddl"))
+    print("grounded:")
+    print("amount of fluents:" + str(len(grounded_problem.fluents)))
+    print("amount of initial values:" +  str(len(grounded_problem.initial_values)))
+    print("amount of grounded variables:" +  str(count_grounded_variables(grounded_problem)))
+    print("amount of actions:" + str(len(grounded_problem.actions)))
+    destroyed_problem = transform_grounded_problem_to_standard(reader.parse_problem(benchmark_path + "destroyed_domain.pddl", benchmark_path + "destroyed_problem.pddl"))
+    print("destroyed:")
+    print("amount of fluents:" + str(len(destroyed_problem.fluents)))
+    print("amount of initial values:" +  str(len(destroyed_problem.initial_values)))
+    print("amount of grounded variables:" +  str(count_grounded_variables(destroyed_problem)))
+    print("amount of actions:" + str(len(destroyed_problem.actions)))
+    variants_path = "out/"
+    variant1_problem = transform_grounded_problem_to_standard(reader.parse_problem(variants_path + "domainExp1.pddl", variants_path + "problemExp1.pddl"))
+    print("variant1:")
+    print("amount of fluents:" + str(len(variant1_problem.fluents)))
+    print("amount of initial values:" +  str(len(variant1_problem.initial_values)))
+    print("amount of grounded variables:" +  str(count_grounded_variables(variant1_problem)))
+    print("amount of actions:" + str(len(variant1_problem.actions)))
+    variant2_problem = transform_grounded_problem_to_standard(reader.parse_problem(variants_path + "domainLin1.pddl", variants_path + "problemLin1.pddl"))
+    print("variant2:")
+    print("amount of fluents:" + str(len(variant2_problem.fluents)))
+    print("amount of initial values:" +  str(len(variant2_problem.initial_values)))
+    print("amount of grounded variables:" +  str(count_grounded_variables(variant2_problem)))
+    print("amount of actions:" + str(len(variant2_problem.actions)))
+
+def count_grounded_variables(problem: Problem) -> int:
+    list_of_variables: list[str] = []
+    for init_val in problem.initial_values:
+        if str(init_val) not in list_of_variables:
+            list_of_variables.append(str(init_val))
+    for action in problem.actions:
+        current_action: InstantaneousAction = action
+        if len(current_action.parameters) != 0:
+            continue
+        for precon in current_action.preconditions:
+            if str(precon) not in list_of_variables:
+                list_of_variables.append(str(precon))
+        for effect in current_action.effects:
+            if str(effect.fluent) not in list_of_variables:
+                list_of_variables.append(str(effect.fluent))
+    for goal in problem.goals:
+        if str(goal) not in list_of_variables:
+            list_of_variables.append(str(goal))
+    return len(list_of_variables)
+     
 
 def create_handcrafted_problems():
     dir_path = "evaluation/simple_benchmark"
@@ -684,8 +739,8 @@ def run_simple_benchmark():
     problem_destroyer.load_all_problems_simple_benchmark()
     problem_destroyer.destroy_problems()
     problem_destroyer.close()
-    write_out_problems(db_file)
-    eval_all(db_file)
+    #write_out_problems(db_file)
+    #eval_all(db_file)
     
     db_handler = DBHandler(db_file)
     db_handler.look_into()
@@ -706,8 +761,9 @@ if __name__ == '__main__':
     #run_db_handler()
     #time_calc()
     #run_exception_fluent()
-    #create_handcrafted_problems()
+    create_handcrafted_problems()
     run_simple_benchmark()
+    #look_at_blocksworld()
     #run_mutate()
     #run_test_eval()
     #change_db()

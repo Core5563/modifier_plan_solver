@@ -14,7 +14,9 @@ CREATE TABLE destroyed_problems (
     problemFilePath TEXT NOT NULL,
     domainContent TEXT NOT NULL,
     problemContent TEXT NOT NULL,
-    errorText TEXT
+    errorText TEXT,
+    groundedProblemContent TEXT,
+    groundedDomainContent TEXT
 );
 
 CREATE TABLE added_preconditions (

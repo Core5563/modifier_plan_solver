@@ -266,13 +266,13 @@ class ProblemDestroyer:
 
         #initalize problem to destroy
         problem_to_destroy: Problem = transform_grounded_problem_to_standard(grounded_information.problem.clone())
-        
-        #write away grounded state
-        grounded_domain_path = domain_path.replace("domain.pddl", "grounded_domain.pddl")
-        grounded_problem_path = problem_path.replace("problem.pddl", "grounded_problem.pddl")
-        writer = PDDLWriter(problem_to_destroy)
-        writer.write_domain(grounded_domain_path)
-        writer.write_problem(grounded_problem_path)
+        #save away grounded problem
+        grounded_problem: Problem = problem_to_destroy.clone()
+        #grounded_domain_path = domain_path.replace("domain.pddl", "grounded_domain.pddl")
+        #grounded_problem_path = problem_path.replace("problem.pddl", "grounded_problem.pddl")
+        #writer = PDDLWriter(grounded_problem)
+        #writer.write_domain(grounded_domain_path)
+        #writer.write_problem(grounded_problem_path)
 
         #print(problem_to_destroy)
         is_problem_solvable: bool = True
@@ -375,26 +375,17 @@ class ProblemDestroyer:
         destroyed_domain_path = domain_path.replace("domain.pddl", "destroyed_domain.pddl")
         destroyed_problem_path = problem_path.replace("problem.pddl", "destroyed_problem.pddl")
         writer = PDDLWriter(problem_to_destroy)
-        writer.write_domain(destroyed_domain_path)
-        writer.write_problem(destroyed_problem_path)
-        file = open(destroyed_domain_path, mode="r", encoding="utf-8")
-        domain_content = file.read().rstrip()
-        try:
-            file.close()
-        except Exception:
-            pass
-        file = open(destroyed_problem_path, mode="r", encoding="utf-8")
-        problem_content = file.read().rstrip()
-        try:
-            file.close()
-        except Exception:
-            pass
+        domain_content = writer.get_domain()
+        problem_content = writer.get_problem()
+        writer_grounded = PDDLWriter(grounded_problem)
         self.db_handler.insert_destroy_problems(
             original_problem_id,
             destroyed_problem_path,
             destroyed_domain_path,
             problem_content,
-            domain_content)
+            domain_content,
+            grounded_problem_content=writer_grounded.get_problem(),
+            grounded_domain_content=writer_grounded.get_domain())
         for action_name, list_fluent_names in added_precon_dict.items():
             for fluent_name in list_fluent_names:
                 self.db_handler.insert_into_added_preconditions(original_problem_id, action_name, fluent_name)
