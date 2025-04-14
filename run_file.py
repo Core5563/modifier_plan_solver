@@ -729,7 +729,8 @@ def create_handcrafted_problems():
     ProblemCreator.create_simple_problems(dir_path)
 
 def run_simple_benchmark():
-    db_file = "out/simpleEval.db"
+    #db_file = "out/simpleEval.db"
+    db_file = "persist/evalSomethingReduced.db"
     db_handler = DBHandler(db_file)
     db_handler.remove_db_file()
     db_handler = DBHandler(db_file)
@@ -761,7 +762,7 @@ if __name__ == '__main__':
     #run_db_handler()
     #time_calc()
     #run_exception_fluent()
-    create_handcrafted_problems()
+    #create_handcrafted_problems()
     run_simple_benchmark()
     #look_at_blocksworld()
     #run_mutate()
