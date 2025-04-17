@@ -161,6 +161,11 @@ class DBHandler:
         )
         self.commit()
 
+    def get_added_preconditions_by_id (self, destroyed_problem_id: int) -> list[tuple[str, str]]:
+        """return list of added preconditions for this destroyed problem"""
+        res = self.curs.execute("SELECT actionName, fluentName FROM added_preconditions WHERE destroyedProblemID=" + str(destroyed_problem_id))
+        return res.fetchall()
+
     def insert_into_results(self, destroyed_problem_id: int, modifier_version_id: int, time_in_milliseconds: int | None, error_text: str | None) -> None:
         """insert into results table"""
         self.curs.execute("INSERT INTO results(destroyedProblemID, modifierVersionID, timeInMilliseconds, errorText) VALUES " +
@@ -191,6 +196,20 @@ class DBHandler:
         )
         result_id = res.fetchone()[0]
         return result_id
+    def get_result_by_id(self, result_id:int) -> None | tuple[int, int, int, int, str]:
+        """
+        get result by id
+        return (resultID, destroyedProblemID, modifierVersionID, timeInMilliseconds, errorText)
+        """
+        res = self.curs.execute(
+                "SELECT resultID, destroyedProblemID, modifierVersionID, timeInMilliseconds, errorText from results" + 
+                "WHERE resultID=" + str(result_id)
+                )
+        res_list = res.fetchall()
+        if res_list is None or len(res_list)==0:
+            return None
+        return res_list[0]
+
 
     def insert_into_left_preconditions_results(self, result_id: int, action_name: str, fluent_name: str) -> None:
         """insert data into left_precondition_results table"""
@@ -203,6 +222,14 @@ class DBHandler:
             ")"
         )
         self.commit()
+    
+    def get_left_preconditions_by_id(self, result_id: int) -> list[tuple[str, str]]:
+        """
+        get left precons by result id
+        (action, removed_precon)
+        """
+        res = self.curs.execute("SELECT actionName, fluentName FROM left_preconditions WHERE resultID=" + str(result_id))
+        return res.fetchall()
 
     def get_all_left_preconditions_results(self) -> list[tuple[int, str, str]]:
         """get everything from the left_preconditions_results table"""

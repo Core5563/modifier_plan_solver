@@ -726,15 +726,15 @@ def count_grounded_variables(problem: Problem) -> int:
 def run_dummy_benchmark():
     db_file = "out/dummyEval.db"
     #db_file = "persist/evalSomethingReduced.db"
-    db_handler = DBHandler(db_file)
-    db_handler.remove_db_file()
-    db_handler = DBHandler(db_file)
-    db_handler.initialize_db()
-    db_handler.close()
-    problem_destroyer = ProblemDestroyer(db_file)
-    problem_destroyer.load_all_problems_dummy_benchmark()
-    problem_destroyer.destroy_problems()
-    problem_destroyer.close()
+    #db_handler = DBHandler(db_file)
+    #db_handler.remove_db_file()
+    #db_handler = DBHandler(db_file)
+    #db_handler.initialize_db()
+    #db_handler.close()
+    #problem_destroyer = ProblemDestroyer(db_file)
+    #problem_destroyer.load_all_problems_dummy_benchmark()
+    #problem_destroyer.destroy_problems()
+    #problem_destroyer.close()
     #write_out_problems(db_file)
     eval_all(db_file)
     
@@ -745,7 +745,7 @@ def create_handcrafted_problems():
     dir_path = "evaluation/dummy_benchmark"
     #dir_path = "out/handcrafted"
     ProblemCreator.create_simple_problems(dir_path)
-    
+
 
 def run_simple_benchmark():
     db_file = "out/simpleEval.db"
