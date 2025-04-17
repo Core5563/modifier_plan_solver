@@ -282,7 +282,8 @@ class ProblemCreator:
         #problem4
         blocksworld4 = blocksworld_template.clone()
         #create Blocks
-        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        #blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD"]
         blocks_objects = [Object(block, Block) for block in blocks_string]
         #add objects to problem
         blocksworld4.add_objects(blocks_objects)
@@ -301,7 +302,8 @@ class ProblemCreator:
         #problem5
         blocksworld5 = blocksworld_template.clone()
         #create Blocks
-        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        #blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD"]
         blocks_objects = [Object(block, Block) for block in blocks_string]
         #add objects to problem
         blocksworld5.add_objects(blocks_objects)
@@ -321,7 +323,8 @@ class ProblemCreator:
         #problem6
         blocksworld6 = blocksworld_template.clone()
         #create Blocks
-        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        #blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD", "BlockE", "BlockF", "BlockG", "BlockH", "BlockI", "BlockJ"]
+        blocks_string = ["BlockA", "BlockB", "BlockC", "BlockD"]
         blocks_objects = [Object(block, Block) for block in blocks_string]
         #add objects to problem
         blocksworld6.add_objects(blocks_objects)

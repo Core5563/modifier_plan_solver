@@ -723,26 +723,50 @@ def count_grounded_variables(problem: Problem) -> int:
     return len(list_of_variables)
      
 
-def create_handcrafted_problems():
-    dir_path = "evaluation/simple_benchmark"
-    #dir_path = "out/handcrafted"
-    ProblemCreator.create_simple_problems(dir_path)
-
-def run_simple_benchmark():
-    #db_file = "out/simpleEval.db"
-    db_file = "persist/evalSomethingReduced.db"
+def run_dummy_benchmark():
+    db_file = "out/dummyEval.db"
+    #db_file = "persist/evalSomethingReduced.db"
     db_handler = DBHandler(db_file)
     db_handler.remove_db_file()
     db_handler = DBHandler(db_file)
     db_handler.initialize_db()
     db_handler.close()
     problem_destroyer = ProblemDestroyer(db_file)
-    problem_destroyer.load_all_problems_simple_benchmark()
+    problem_destroyer.load_all_problems_dummy_benchmark()
     problem_destroyer.destroy_problems()
     problem_destroyer.close()
     #write_out_problems(db_file)
-    #eval_all(db_file)
+    eval_all(db_file)
     
+    db_handler = DBHandler(db_file)
+    db_handler.look_into()
+
+def create_handcrafted_problems():
+    dir_path = "evaluation/dummy_benchmark"
+    #dir_path = "out/handcrafted"
+    ProblemCreator.create_simple_problems(dir_path)
+    
+
+def run_simple_benchmark():
+    db_file = "out/simpleEval.db"
+    #db_file = "persist/evalSomethingReduced.db"
+    #db_handler = DBHandler(db_file)
+    #db_handler.remove_db_file()
+    #db_handler = DBHandler(db_file)
+    #db_handler.initialize_db()
+    #db_handler.close()
+    #problem_destroyer = ProblemDestroyer(db_file)
+    #problem_destroyer.load_all_problems_simple_benchmark()
+    #problem_destroyer.destroy_problems()
+    #problem_destroyer.close()
+    #write_out_problems(db_file)
+    eval_all(db_file)
+    
+    db_handler = DBHandler(db_file)
+    db_handler.look_into()
+
+def look_into():
+    db_file = "evaluation/evalSomethingReduced.db"
     db_handler = DBHandler(db_file)
     db_handler.look_into()
 
@@ -763,7 +787,7 @@ if __name__ == '__main__':
     #time_calc()
     #run_exception_fluent()
     #create_handcrafted_problems()
-    run_simple_benchmark()
+    #run_simple_benchmark()
     #look_at_blocksworld()
     #run_mutate()
     #run_test_eval()
@@ -771,7 +795,7 @@ if __name__ == '__main__':
     
     #run_load_IPC2016()
 
-
+    run_dummy_benchmark()
 
 
     #some_solvable_example_with_basic_code_plus_save()
@@ -783,7 +807,7 @@ if __name__ == '__main__':
     
     
     #docker_look_into()
-
+    #look_into()
     
 
     #run_clear_destroy_problems()

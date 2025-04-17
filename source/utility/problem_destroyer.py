@@ -168,13 +168,18 @@ class ProblemDestroyer:
                 )
 
     def load_all_problems_easy_benchmark(self):
-        """load dummy benchmark"""
+        """load easy benchmark"""
         self.pre_path = "evaluation/easy_benchmark/"
         self.load_all_problems()
 
     def load_all_problems_simple_benchmark(self):
         """load handcrafted benchmark"""
         self.pre_path = "evaluation/simple_benchmark/"
+        self.load_all_problems()
+
+    def load_all_problems_dummy_benchmark(self):
+        """load dummy benchmark"""
+        self.pre_path = "evaluation/dummy_benchmark/"
         self.load_all_problems()
 
     def load_all_problems_IPC2014(self):

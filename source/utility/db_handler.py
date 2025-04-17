@@ -39,6 +39,12 @@ class DBHandler:
         res = self.curs.execute("SELECT * FROM destroyed_problems")
         return res.fetchall()
 
+    def get_destroyed_problem_by_id(self, problem_id: int) -> None | tuple[int, str, str, str ,str , str | None, str, str]:
+        """get the destroyed problem by the given id"""
+        res = self.curs.execute("SELECT * FROM destroyed_problems WHERE destroyedProblemID=" + str(problem_id))
+        list_of_tuples  = res.fetchall()
+        return (None if len(list_of_tuples) == 0 else list_of_tuples[0])
+
     def get_working_destroyed_problems(self) -> list[tuple[int, str, str]]:
         """returns (id, domain_content, problem_content)"""
         res = self.curs.execute(

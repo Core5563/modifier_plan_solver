@@ -5,7 +5,8 @@ from source.utility.evaluation import eval_all
 
 def run_simple_benchmark():
     """run the benchmark"""
-    db_file = "/var/persist/evalSomethingReduced.db"
+    db_file = "/var/persist/simpleEval.db"
+    #db_file = "var/persist/evalSomethingReduced.db"
     #db_handler = DBHandler(db_file)
     #db_handler.remove_db_file()
     #db_handler = DBHandler(db_file)
