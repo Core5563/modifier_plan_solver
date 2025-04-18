@@ -230,7 +230,7 @@ class DBHandler:
         get left precons by result id
         (action, removed_precon)
         """
-        res = self.curs.execute("SELECT actionName, fluentName FROM left_preconditions WHERE resultID=" + str(result_id))
+        res = self.curs.execute("SELECT actionName, fluentName FROM left_preconditions_results WHERE resultID=" + str(result_id))
         return res.fetchall()
 
     def get_all_left_preconditions_results(self) -> list[tuple[int, str, str]]:
@@ -284,6 +284,7 @@ class DBHandler:
         print("all from add preconditions===================")
         print(self.get_all_add_preconditions())
         print("all from results:============================")
-        print(self.get_all_from_results())
+        for result_tuple in self.get_all_from_results():
+            print(result_tuple)
         print("all from left preconditions: ================")
         print(self.get_all_left_preconditions_results())

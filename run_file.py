@@ -747,6 +747,11 @@ def create_handcrafted_problems():
     #dir_path = "out/handcrafted"
     ProblemCreator.create_simple_problems(dir_path)
 
+def remove_from_db():
+    db_file = "out/evalSomethingReduced.db"
+    eval_all(db_file)
+    #db_handler = DBHandler(db_file)
+    #db_handler.run_command("DELETE FROM results WHERE destroyedProblemID in (4,5)")
 
 def run_simple_benchmark():
     db_file = "out/simpleEval.db"
@@ -767,7 +772,8 @@ def run_simple_benchmark():
     db_handler.look_into()
 
 def look_into():
-    db_file = "evaluation/evalSomethingReduced.db"
+    #db_file = "evaluation/evalSomethingReduced.db"
+    db_file = "out/evalSomethingReduced.db"
     db_handler = DBHandler(db_file)
     db_handler.look_into()
 
@@ -814,7 +820,9 @@ if __name__ == '__main__':
     
     
     #docker_look_into()
-    #look_into()
+    
+    #remove_from_db()
+    look_into()
     
 
     #run_clear_destroy_problems()
@@ -822,8 +830,6 @@ if __name__ == '__main__':
 
     #run_export_db()
     #run_import_db()
-    
-
 
     run_analyze_eval()
     pass
