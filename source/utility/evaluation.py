@@ -1,58 +1,63 @@
 import traceback
-from os.path import isfile
+from pathlib import Path
 from multiprocessing import Process, Manager, Queue
-from unified_planning.io import PDDLWriter
+from unified_planning.io import PDDLWriter, PDDLReader
 from source.utility.db_handler import DBHandler
 from source.utility.multiprocess_tasks import modifier_solve_with_time
 from source.model.plan_modifiers.problem_modifier import ProblemModifier
 from source.model.plan_modifiers.exp_modifier import ExpModifier
 from source.model.plan_modifiers.lin_modifier import LinModifier
 
-def write_out_problems(db_file: str) -> None:
+def write_out_problems(db_file: str, write_dir: str, remove_pre_path: str|None = None) -> None:
     """write out the problems"""
     db_handler: DBHandler = DBHandler(db_file)
-    exp_modifier_id = 1
-    lin_modifier_id = 2
     destroyed_problem_list: list[tuple[int, str, str]] = db_handler.get_working_destroyed_problems()
     for (destroyed_problem_id, domain_content, problem_content) in destroyed_problem_list:
-        content_dir = "out"
+        
+        (_, path_domain, path_problem, content_domain, content_problem, error_text, grounded_problem_content, grounded_domain_content) = db_handler.get_destroyed_problem_by_id(destroyed_problem_id)
+        added_path = path_domain.replace("/destroyed_domain.pddl", "")
+        if remove_pre_path is not None:
+            added_path = added_path.removeprefix(remove_pre_path)
+        content_dir = write_dir + "/" + added_path
+        #create unknown path
+        Path(content_dir).mkdir(parents=True, exist_ok=True)
+
+        reader = PDDLReader()
+        #write grounded
+        writer_grounded = PDDLWriter(reader.parse_problem_string(grounded_domain_content, grounded_problem_content))
+        writer_grounded.write_domain(content_dir + "/grounded_domain.pddl")
+        writer_grounded.write_problem(content_dir + "/grounded_problem.pddl")
+        #write destroyed
+        writer_destroyed = PDDLWriter(reader.parse_problem_string(content_domain, content_problem))
+        writer_destroyed.write_domain(content_dir + "/destroyed_domain.pddl")
+        writer_destroyed.write_problem(content_dir + "/destroyed_problem.pddl")
         #exp modifier
-        if not db_handler.is_result_already_in_database(destroyed_problem_id, exp_modifier_id):
-            try:
-                dom_file = content_dir + "/" + "domainExp" + str(destroyed_problem_id) + ".pddl"
-                prob_file = content_dir + "/" + "problemExp" + str(destroyed_problem_id) + ".pddl"
-                if not isfile(dom_file):
-                    modifier = ExpModifier.from_text_eval(domain_content, problem_content)
-                    writer = PDDLWriter(modifier.modified_problem_info.problem)
-                    writer.write_domain(dom_file)
-                    writer.write_problem(prob_file)
-                    print("written EXP")
-                else:
-                    print(dom_file + " already exists")
-                #eval_single(modifier, exp_modifier_id, destroyed_problem_id, db_handler)
-            except Exception:
-                error_text = traceback.format_exc()
-                print(error_text)
+        try:
+            dom_file = content_dir + "/" + "domainExp.pddl"
+            prob_file = content_dir + "/" + "problemExp.pddl"
+            modifier = ExpModifier.from_text_eval(domain_content, problem_content)
+            writer = PDDLWriter(modifier.modified_problem_info.problem)
+            writer.write_domain(dom_file)
+            writer.write_problem(prob_file)
+            #eval_single(modifier, exp_modifier_id, destroyed_problem_id, db_handler)
+        except Exception:
+            error_text = traceback.format_exc()
+            print(error_text)
                 #db_handler.insert_into_results(destroyed_problem_id, exp_modifier_id, None, error_text)
-    
         #lin modifier
-        if not db_handler.is_result_already_in_database(destroyed_problem_id, lin_modifier_id):
-            try:
-                dom_file = content_dir + "/" + "domainLin" + str(destroyed_problem_id) + ".pddl"
-                prob_file = content_dir + "/" + "problemLin" + str(destroyed_problem_id) + ".pddl"
-                if not isfile(dom_file):
-                    modifier = LinModifier.from_text_eval(domain_content, problem_content)
-                    writer = PDDLWriter(modifier.modified_problem_info.problem)
-                    writer.write_domain(dom_file)
-                    writer.write_problem(prob_file)
-                    print("written LIN")
-                else:
-                    print(dom_file + " already exists")
-                #eval_single(modifier, lin_modifier_id, destroyed_problem_id, db_handler)
-            except Exception:
-                error_text = traceback.format_exc()
-                print(error_text)
-                #db_handler.insert_into_results(destroyed_problem_id, lin_modifier_id, None, error_text)
+        
+        try:
+            dom_file = content_dir + "/" + "domainLin.pddl"
+            prob_file = content_dir + "/" + "problemLin.pddl"
+            modifier = LinModifier.from_text_eval(domain_content, problem_content)
+            writer = PDDLWriter(modifier.modified_problem_info.problem)
+            writer.write_domain(dom_file)
+            writer.write_problem(prob_file)
+            #eval_single(modifier, lin_modifier_id, destroyed_problem_id, db_handler)
+        except Exception:
+            error_text = traceback.format_exc()
+            print(error_text)
+            #db_handler.insert_into_results(destroyed_problem_id, lin_modifier_id, None, error_text)
     db_handler.close()
 
 

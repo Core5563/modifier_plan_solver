@@ -749,7 +749,8 @@ def create_handcrafted_problems():
 
 def remove_from_db():
     db_file = "out/evalSomethingReduced.db"
-    eval_all(db_file)
+    write_out_problems(db_file, "out", "evaluation/")
+    #eval_all(db_file)
     #db_handler = DBHandler(db_file)
     #db_handler.run_command("DELETE FROM results WHERE destroyedProblemID in (4,5)")
 
@@ -821,7 +822,7 @@ if __name__ == '__main__':
     
     #docker_look_into()
     
-    #remove_from_db()
+    remove_from_db()
     look_into()
     
 
@@ -831,5 +832,5 @@ if __name__ == '__main__':
     #run_export_db()
     #run_import_db()
 
-    run_analyze_eval()
+    #run_analyze_eval()
     pass
