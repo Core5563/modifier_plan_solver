@@ -461,7 +461,7 @@ def run_problem_destroyer():
     pd.destroy_problems()
 
 def docker_init():
-    file_path = "persist/eval.db"
+    file_path = "persist/secondTry.db"
     remove_file(file_path)
     db_handler = DBHandler(file_path)
     db_handler.initialize_db()
@@ -771,7 +771,7 @@ def look_into():
     db_handler.look_into()
 
 def run_analyze_eval():
-    
+    pass
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -803,7 +803,7 @@ if __name__ == '__main__':
 
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
-    #docker_init()
+    docker_init()
     #docker_scan()
     #run_destroy_yourself()
     #run_eval_all()
