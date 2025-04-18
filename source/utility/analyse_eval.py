@@ -1,4 +1,5 @@
 """module to analyze results"""
+import csv
 from unified_planning.shortcuts import Problem, InstantaneousAction
 from unified_planning.io import PDDLReader, PDDLWriter
 from source.utility.db_handler import DBHandler
@@ -12,6 +13,22 @@ def analyse_all(csv_file_path: str, db_file_path: str) -> None:
     db_handler = DBHandler(db_file_path)
     list_of_original_problems = db_handler.get_all_original_problems()
     data = []
+    headers = (
+            "amount_actions_grounded",
+            "amount_variables_grounded",
+            "plan_solvable_cost",
+            "used_cost_penalty",
+            "is_solvable_exp, is_solvable_lin",
+            "amount_action_exp_variant",
+            "amount_variables_exp_variant",
+            "amount_action_lin_variant",
+            "amount_variables_lin_variant",
+            "total_amount_added_precons",
+            "total_amount_removed_precons_exp",
+            "total_amount_removed_precons_lin",
+            "amount_same_removed_lin_exp"
+    )
+    data.append(headers)
     db_handler.look_into()
     for (original_problem_id, domain_file_path, problem_file_path, plan_solvable_cost,solve_time_milliseconds, error_text_original, is_longer_30_min) in list_of_original_problems:
         if error_text_original is None or is_longer_30_min == 1:
@@ -121,13 +138,18 @@ def analyse_all(csv_file_path: str, db_file_path: str) -> None:
             plan_solvable_cost,
             used_cost_penalty,
             is_solvable_exp, is_solvable_lin,
-            amount_action_exp_variant, amount_variables_exp_variant,
-            amount_action_lin_variant, amount_variables_lin_variant,
-            total_amount_added_precons,
-            total_amount_removed_precons_exp, total_amount_removed_precons_lin,
-            amount_same_removed_lin_exp
+            amount_action_exp_variant if is_solvable_exp else None,
+            amount_variables_exp_variant if is_solvable_exp else None,
+            amount_action_lin_variant if is_solvable_exp else None,
+            amount_variables_lin_variant if is_solvable_exp else None,
+            total_amount_added_precons if is_solvable_exp else None,
+            total_amount_removed_precons_exp if is_solvable_exp else None,
+            total_amount_removed_precons_lin if is_solvable_exp else None,
+            amount_same_removed_lin_exp if is_solvable_exp and is_solvable_lin else None
         )
         data.append(data_tuple)
+    
+
 
 
         
@@ -177,3 +199,4 @@ def count_grounded_variables(problem: Problem) -> int:
         if str(goal) not in list_of_variables:
             list_of_variables.append(str(goal))
     return len(list_of_variables)
+    

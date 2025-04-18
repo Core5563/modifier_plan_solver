@@ -770,6 +770,9 @@ def look_into():
     db_handler = DBHandler(db_file)
     db_handler.look_into()
 
+def run_analyze_eval():
+    
+
 if __name__ == '__main__':
     # readInWithActionCost()
     # instantiatePlanModifier()
@@ -795,7 +798,7 @@ if __name__ == '__main__':
     
     #run_load_IPC2016()
 
-    run_dummy_benchmark()
+    #run_dummy_benchmark()
 
 
     #some_solvable_example_with_basic_code_plus_save()
@@ -816,4 +819,7 @@ if __name__ == '__main__':
     #run_export_db()
     #run_import_db()
     
+
+
+    run_analyze_eval()
     pass
