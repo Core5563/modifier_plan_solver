@@ -196,13 +196,15 @@ class DBHandler:
         )
         result_id = res.fetchone()[0]
         return result_id
+    
+    
     def get_result_by_id(self, result_id:int) -> None | tuple[int, int, int, int, str]:
         """
         get result by id
         return (resultID, destroyedProblemID, modifierVersionID, timeInMilliseconds, errorText)
         """
         res = self.curs.execute(
-                "SELECT resultID, destroyedProblemID, modifierVersionID, timeInMilliseconds, errorText from results" + 
+                "SELECT resultID, destroyedProblemID, modifierVersionID, timeInMilliseconds, errorText from results " + 
                 "WHERE resultID=" + str(result_id)
                 )
         res_list = res.fetchall()

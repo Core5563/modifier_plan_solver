@@ -13,12 +13,13 @@ def analyse_all(csv_file_path: str, db_file_path: str) -> None:
     db_handler = DBHandler(db_file_path)
     list_of_original_problems = db_handler.get_all_original_problems()
     data = []
-    headers = (
+    headers = ("path",
             "amount_actions_grounded",
             "amount_variables_grounded",
             "plan_solvable_cost",
             "used_cost_penalty",
-            "is_solvable_exp, is_solvable_lin",
+            "is_solvable_exp",
+            "is_solvable_lin",
             "amount_action_exp_variant",
             "amount_variables_exp_variant",
             "amount_action_lin_variant",
@@ -31,7 +32,9 @@ def analyse_all(csv_file_path: str, db_file_path: str) -> None:
     data.append(headers)
     db_handler.look_into()
     for (original_problem_id, domain_file_path, problem_file_path, plan_solvable_cost,solve_time_milliseconds, error_text_original, is_longer_30_min) in list_of_original_problems:
-        if error_text_original is None or is_longer_30_min == 1:
+        if error_text_original is not None or is_longer_30_min:
+            print(error_text_original)
+            print(is_longer_30_min)
             print("Error or longer to solve than 30 min. Aborting")
             continue
         destroyed_problem_tuple = db_handler.get_destroyed_problem_by_id(original_problem_id)
@@ -39,7 +42,7 @@ def analyse_all(csv_file_path: str, db_file_path: str) -> None:
             print("could not find original problem with id=" + str(original_problem_id) + ". Aborting")
             continue
         (_, path_domain, path_problem, content_domain, content_problem, error_text, grounded_problem_content, grounded_domain_content) = destroyed_problem_tuple
-        if error_text is None:
+        if error_text is not None:
             print("destroying the problem failed because of an error. Aborting")
             continue
         reader = PDDLReader()
@@ -131,24 +134,27 @@ def analyse_all(csv_file_path: str, db_file_path: str) -> None:
         # amount_addded_precons, 
         # amount_removed_precons_exp, amount_removed_precons_lin, 
         # same_removed_lin_exp
-        
         data_tuple = (
+            problem_file_path.removesuffix("/problem.pddl"),
             amount_actions_grounded,
             amount_variables_grounded,
             plan_solvable_cost,
             used_cost_penalty,
             is_solvable_exp, is_solvable_lin,
-            amount_action_exp_variant if is_solvable_exp else None,
-            amount_variables_exp_variant if is_solvable_exp else None,
-            amount_action_lin_variant if is_solvable_exp else None,
-            amount_variables_lin_variant if is_solvable_exp else None,
-            total_amount_added_precons if is_solvable_exp else None,
+            amount_action_exp_variant,
+            amount_variables_exp_variant,
+            amount_action_lin_variant,
+            amount_variables_lin_variant,
+            total_amount_added_precons,
             total_amount_removed_precons_exp if is_solvable_exp else None,
-            total_amount_removed_precons_lin if is_solvable_exp else None,
+            total_amount_removed_precons_lin if is_solvable_lin else None,
             amount_same_removed_lin_exp if is_solvable_exp and is_solvable_lin else None
         )
         data.append(data_tuple)
-    
+    print(data)
+    with open(csv_file_path, 'w', newline='') as csv_file:
+        csv_writer = csv.writer(csv_file, delimiter='|', quotechar='\"')
+        csv_writer.writerows(data)
 
 
 
@@ -176,12 +182,13 @@ def is_in_removed_precon_list(added_action: str, added_precon:str , removed_list
 
 def count_action_and_variables(problem: Problem) -> tuple[int, int]:
     """returns (amount_of_actions, amount_of_variables)"""
-    return (len(problem.actions), count_grounded_variables(Problem))
+    return (len(problem.actions), count_grounded_variables(problem))
 
 
 def count_grounded_variables(problem: Problem) -> int:
     """return the grounded variables"""
     list_of_variables: list[str] = []
+    
     for init_val in problem.initial_values:
         if str(init_val) not in list_of_variables:
             list_of_variables.append(str(init_val))
@@ -199,4 +206,3 @@ def count_grounded_variables(problem: Problem) -> int:
         if str(goal) not in list_of_variables:
             list_of_variables.append(str(goal))
     return len(list_of_variables)
-    

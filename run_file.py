@@ -20,6 +20,7 @@ from source.utility.file_util import remove_file
 from source.utility.evaluation import eval_all, write_out_problems
 from source.utility.transform_grounded import transform_grounded_problem_to_standard
 from source.utility.eval_ipc2016 import load_ipc206_problems_into_database
+from source.utility.analyse_eval import analyse_all
 
 
 def runReadInFromFile():
@@ -771,7 +772,10 @@ def look_into():
     db_handler.look_into()
 
 def run_analyze_eval():
-    pass
+    csv_file = "out/output.csv"
+    db_file = "out/evalSomethingReduced.db"
+    remove_file(csv_file)
+    analyse_all(csv_file, db_file)
 
 if __name__ == '__main__':
     # readInWithActionCost()
@@ -803,7 +807,7 @@ if __name__ == '__main__':
 
     #some_solvable_example_with_basic_code_plus_save()
     #comparison_problem_fluents()
-    docker_init()
+    #docker_init()
     #docker_scan()
     #run_destroy_yourself()
     #run_eval_all()
