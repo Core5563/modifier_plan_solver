@@ -53,13 +53,13 @@ def ground_unsolvable_problem_multithread(problem: Problem, return_dict: dict[in
         return
     return_dict[0] = to_return
 
-def modifier_solve_with_time(queue: Queue, return_time_dict: dict[int, int], return_error_dict: dict[int, str])-> None:
+def modifier_solve_with_time(queue: Queue, return_time_dict: dict[int, int], return_error_dict: dict[int, str], solve_optimally: bool = True)-> None:
     """solve the problem with time limit"""
 
     modifier: ProblemModifier = queue.get()
     start = time.perf_counter_ns()
     try:
-        modifier.try_solving_plan()
+        modifier.try_solving_plan(solve_optimally=solve_optimally)
     except Exception:
         error_text = traceback.format_exc()
         return_error_dict[0] = error_text

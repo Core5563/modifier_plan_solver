@@ -17,7 +17,7 @@ def run_simple_benchmark():
     problem_destroyer.load_all_problems_simple_benchmark()
     problem_destroyer.destroy_problems()
     problem_destroyer.close()
-    eval_all(db_file)
+    eval_all(db_file, solve_optimally=False)
     #db_handler = DBHandler(db_file)
     #db_handler.look_into()
 

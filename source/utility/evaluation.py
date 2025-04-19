@@ -61,7 +61,7 @@ def write_out_problems(db_file: str, write_dir: str, remove_pre_path: str|None =
     db_handler.close()
 
 
-def eval_all(db_file: str) -> None:
+def eval_all(db_file: str, solve_optimally: bool = True) -> None:
     """evaluate all destroyed problems"""
     db_handler: DBHandler = DBHandler(db_file)
     exp_modifier_id = 1
@@ -72,7 +72,7 @@ def eval_all(db_file: str) -> None:
         if not db_handler.is_result_already_in_database(destroyed_problem_id, exp_modifier_id):
             try:
                 modifier = ExpModifier.from_text_eval(domain_content, problem_content)
-                eval_single(modifier, exp_modifier_id, destroyed_problem_id, db_handler)
+                eval_single(modifier, exp_modifier_id, destroyed_problem_id, db_handler, solve_optimally)
             except Exception:
                 error_text = traceback.format_exc()
                 print(error_text)
@@ -82,7 +82,7 @@ def eval_all(db_file: str) -> None:
         if not db_handler.is_result_already_in_database(destroyed_problem_id, lin_modifier_id):
             try:
                 modifier = LinModifier.from_text_eval(domain_content, problem_content)
-                eval_single(modifier, lin_modifier_id, destroyed_problem_id, db_handler)
+                eval_single(modifier, lin_modifier_id, destroyed_problem_id, db_handler, solve_optimally)
             except Exception:
                 error_text = traceback.format_exc()
                 print(error_text)
@@ -90,7 +90,7 @@ def eval_all(db_file: str) -> None:
     db_handler.close()
 
 
-def eval_single(modifier:ProblemModifier, modifier_id: int, destroyed_problem_id: int, db_handler: DBHandler) -> None:
+def eval_single(modifier:ProblemModifier, modifier_id: int, destroyed_problem_id: int, db_handler: DBHandler, solve_optimally: bool = True) -> None:
     """evaluate one single destroyed_problem for exponential problem modifier"""
     manager_time: Manager = Manager()
     manager_error: Manager = Manager()
@@ -99,7 +99,7 @@ def eval_single(modifier:ProblemModifier, modifier_id: int, destroyed_problem_id
     queue_modifier.put(modifier)
     return_time_dict: dict[int, int] = manager_time.dict()
     return_error_dict: dict[int, str] = manager_error.dict()
-    process = Process(target=modifier_solve_with_time, name="try_solving", args=(queue_modifier, return_time_dict, return_error_dict))
+    process = Process(target=modifier_solve_with_time, name="try_solving", args=(queue_modifier, return_time_dict, return_error_dict, solve_optimally))
     process.start()
     print("starting trying to solve problem")
     time_to_wait_in_minutes = 120

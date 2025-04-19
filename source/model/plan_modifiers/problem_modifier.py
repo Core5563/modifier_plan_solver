@@ -63,7 +63,7 @@ class ProblemModifier(ABC):
         """create substitute plan from original plan """
         raise NotImplementedError
 
-    def try_solving_plan(self) -> None:
+    def try_solving_plan(self, solve_optimally: bool = True) -> None:
         """use a planner to solve and backtrack on the modified problem """
         #Solve modified Plan
         #perform transformation steps
@@ -75,7 +75,7 @@ class ProblemModifier(ABC):
             'fast_downward_translate_options': ['--invariant-generation-max-candidates', '0'],
             'fast_downward_search_config': 'astar(lmcut())'
         }
-        planer = OneshotPlanner(name="fast-downward", params=params)
+        planer: OneshotPlanner = OneshotPlanner(name="fast-downward", params=params) if solve_optimally else OneshotPlanner(name="fast-downward")
         
         plan_results: PlanGenerationResult = planer.solve(self.modified_problem_info.problem)
 
